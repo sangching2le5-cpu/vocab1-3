@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Unit 1–3 — Learning App</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #4a7fd4; --primary-dark: #3665b0; --primary-soft: #e8f0fd;
+  --bg: #f4f7fb; --card: #ffffff; --text: #1f2b3d; --muted: #64748b;
+  --border: #e2e8f0; --border-strong: #cbd5e1;
+  --green: #16a34a; --green-bg: #e9f9ef;
+  --red: #dc2626; --red-bg: #fdecec;
+  --amber: #d97706; --amber-bg: #fef3c7;
+  --violet: #7c3aed; --violet-bg: #ede9fe;
+  --shadow: 0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06);
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+/* ---------- Layout ---------- */
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar {
+  background: #fff; border-right: 1px solid var(--border);
+  padding: 22px 14px; position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; display: flex; flex-direction: column;
+}
+.brand { font-size: 17px; font-weight: 800; color: var(--primary-dark); padding: 0 10px 20px; letter-spacing: -.3px; }
+.brand small { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 11px 14px; border: none; background: transparent;
+  border-radius: 10px; font-size: 14.5px; font-weight: 600;
+  color: var(--text); text-align: left; margin-bottom: 3px;
+  transition: background .15s ease, color .15s ease;
+}
+.nav-btn:hover { background: #f1f5fb; }
+.nav-btn.active { background: var(--primary-soft); color: var(--primary-dark); }
+.nav-btn .ico { font-size: 17px; width: 22px; text-align: center; }
+.sidebar-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+
+.main { padding: 26px 32px 70px; max-width: 1200px; }
+.page-title { font-size: 26px; letter-spacing: -.4px; margin-bottom: 6px; }
+.page-sub { color: var(--muted); font-size: 14.5px; margin-bottom: 24px; }
+
+/* Mobile top bar */
+.mobile-bar { display: none; }
+
+/* ---------- Dashboard cards ---------- */
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.dash-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px; cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.dash-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: #d5e3f8; }
+.dash-card .ico { font-size: 30px; }
+.dash-card h3 { font-size: 17px; letter-spacing: -.2px; }
+.dash-card p { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.dash-card .prog-line { font-size: 12.5px; font-weight: 700; color: var(--primary-dark); margin-top: 4px; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  border-radius: 10px; padding: 10px 16px; font-size: 14.5px; font-weight: 600;
+  border: 1px solid transparent; transition: all .15s ease; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-ghost { background: #fff; color: var(--text); border-color: var(--border-strong); }
+.btn-ghost:hover { background: #f1f5fb; }
+.btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.full { width: 100%; }
+
+/* ---------- Search/filters ---------- */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+.search-box {
+  flex: 1; min-width: 200px; padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14.5px; background: #fff;
+}
+.search-box:focus { outline: none; border-color: var(--primary); }
+select.filter {
+  padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 14px; background: #fff; cursor: pointer;
+}
+select.filter:focus { outline: none; border-color: var(--primary); }
+.chip {
+  padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--border);
+  background: #fff; font-size: 13.5px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all .15s ease;
+}
+.chip:hover { background: #f1f5fb; }
+.chip.active { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-dark); }
+
+/* ---------- Vocabulary cards ---------- */
+.vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.vocab-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px; position: relative; transition: all .15s ease;
+}
+.vocab-card:hover { box-shadow: var(--shadow-sm); border-color: #c9dcf4; }
+.vocab-card .word { font-size: 19px; font-weight: 800; color: var(--primary-dark); letter-spacing: -.3px; }
+.vocab-card .ipa { color: var(--muted); font-size: 13px; margin: 3px 0 6px; font-family: 'Segoe UI', sans-serif; }
+.vocab-card .pos {
+  display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; background: var(--primary-soft); color: var(--primary-dark);
+  padding: 3px 8px; border-radius: 999px; margin-bottom: 8px;
+}
+.vocab-card .meaning { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.vocab-card .def { font-size: 13.5px; color: #475569; margin-bottom: 8px; line-height: 1.55; }
+.vocab-card .ex { font-size: 13.5px; color: var(--muted); font-style: italic; padding-left: 10px; border-left: 3px solid var(--border); }
+.vocab-actions { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+  background: #fff; font-size: 15px; display: flex; align-items: center; justify-content: center;
+  transition: all .15s ease;
+}
+.icon-btn:hover { background: #f1f5fb; }
+.icon-btn.on { background: var(--amber-bg); border-color: #fbbf24; }
+.icon-btn.mastered { background: var(--green-bg); border-color: #86efac; }
+.vocab-card.mastered { border-color: #86efac; background: linear-gradient(to bottom, #f0fdf4, #ffffff); }
+
+/* ---------- Flashcards ---------- */
+.flash-wrap { max-width: 640px; margin: 0 auto; }
+.flash-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; font-size: 14px; color: var(--muted); }
+.flash-progress .bar { flex: 1; height: 8px; background: #e8eef7; border-radius: 999px; overflow: hidden; }
+.flash-progress .bar > div { height: 100%; background: linear-gradient(90deg, #6fa2ea, var(--primary)); transition: width .3s ease; }
+.flash-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 20px;
+  min-height: 320px; padding: 40px 30px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; cursor: pointer;
+  box-shadow: var(--shadow); transition: transform .18s ease;
+  position: relative; user-select: none;
+}
+.flash-card:active { transform: scale(.99); }
+.flash-card .front, .flash-card .back { width: 100%; }
+.flash-card .f-word { font-size: 36px; font-weight: 800; color: var(--primary-dark); letter-spacing: -.8px; margin-bottom: 8px; }
+.flash-card .f-ipa { font-size: 17px; color: var(--muted); margin-bottom: 14px; }
+.flash-card .f-pos { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+  background: var(--primary-soft); color: var(--primary-dark); padding: 5px 12px; border-radius: 999px; display: inline-block; }
+.flash-card .hint { font-size: 12.5px; color: var(--muted); margin-top: 28px; }
+.flash-card .b-meaning { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+.flash-card .b-def { font-size: 15px; color: #475569; margin-bottom: 16px; line-height: 1.6; }
+.flash-card .b-ex { font-size: 14.5px; color: var(--muted); font-style: italic; padding: 12px 16px;
+  background: #f7fafd; border-radius: 10px; border-left: 3px solid var(--primary); text-align: left; }
+.flash-nav { display: flex; gap: 10px; margin-top: 20px; }
+.flash-nav .btn { flex: 1; }
+.flash-judge { display: flex; gap: 12px; margin-top: 16px; }
+.flash-judge .btn { flex: 1; padding: 14px; font-size: 15px; }
+
+/* ---------- Questions ---------- */
+.q-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 16px;
+  padding: 26px 28px; box-shadow: var(--shadow-sm); margin-bottom: 18px;
+}
+.q-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; font-size: 12.5px; font-weight: 700; }
+.q-meta .tag { padding: 4px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-dark); text-transform: uppercase; letter-spacing: .4px; }
+.q-meta .tag.unit { background: var(--violet-bg); color: var(--violet); }
+.q-meta .tag.part { background: var(--amber-bg); color: var(--amber); }
+.q-text { font-size: 18px; font-weight: 600; line-height: 1.6; margin-bottom: 20px; color: #14243d; }
+.q-text .blank { color: var(--primary); font-weight: 800; }
+.q-options { display: flex; flex-direction: column; gap: 10px; }
+.q-opt {
+  display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left;
+  padding: 13px 16px; border: 1.5px solid var(--border); border-radius: 12px;
+  background: #fff; font-size: 15.5px; line-height: 1.5; color: var(--text);
+  transition: all .15s ease;
+}
+.q-opt:hover { background: #f7faff; border-color: #bcd3f3; }
+.q-opt .letter {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  background: #eef3fb; color: #4a6080; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.q-opt.selected { background: var(--primary-soft); border-color: var(--primary); }
+.q-opt.selected .letter { background: var(--primary); color: #fff; }
+.q-opt.correct { background: var(--green-bg); border-color: #86efac; }
+.q-opt.correct .letter { background: var(--green); color: #fff; }
+.q-opt.wrong { background: var(--red-bg); border-color: #f3bcbc; }
+.q-opt.wrong .letter { background: var(--red); color: #fff; }
+.q-opt:disabled { cursor: default; }
+.q-opt:disabled:hover { background: inherit; border-color: inherit; }
+.q-opt.correct:disabled:hover { background: var(--green-bg); border-color: #86efac; }
+.q-opt.wrong:disabled:hover { background: var(--red-bg); border-color: #f3bcbc; }
+.q-opt.selected:disabled:hover { background: var(--primary-soft); border-color: var(--primary); }
+
+.q-feedback { margin-top: 16px; padding: 14px 16px; border-radius: 12px; font-size: 14.5px; line-height: 1.6; }
+.q-feedback.ok { background: var(--green-bg); border-left: 4px solid var(--green); color: #14532d; }
+.q-feedback.bad { background: var(--red-bg); border-left: 4px solid var(--red); color: #7f1d1d; }
+.q-feedback strong { display: block; margin-bottom: 5px; font-size: 15px; }
+
+/* ---------- Progress / result ---------- */
+.result-hero { text-align: center; padding: 30px 20px; background: #fff; border: 1px solid var(--border); border-radius: 18px; margin-bottom: 22px; box-shadow: var(--shadow-sm); }
+.result-hero .big { font-size: 52px; font-weight: 800; color: var(--primary-dark); letter-spacing: -2px; line-height: 1.05; }
+.result-hero .pct { font-size: 18px; font-weight: 700; color: var(--muted); margin: 6px 0 18px; }
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.stat-box { background: #f7fafd; border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
+.stat-box .num { font-size: 24px; font-weight: 800; }
+.stat-box .lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-top: 4px; font-weight: 700; }
+.stat-box.ok .num { color: var(--green); }
+.stat-box.bad .num { color: var(--red); }
+
+.progress-bar-lg { height: 12px; background: #e8eef7; border-radius: 999px; overflow: hidden; margin: 8px 0; }
+.progress-bar-lg > div { height: 100%; background: linear-gradient(90deg, #6fa2ea, var(--primary)); border-radius: 999px; transition: width .4s ease; }
+
+.prog-block { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+.prog-block h3 { font-size: 16px; margin-bottom: 12px; }
+.prog-block .row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; color: var(--muted); }
+.prog-block .row strong { color: var(--text); }
+
+.unit-prog { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.unit-prog .u-name { width: 70px; font-weight: 700; font-size: 14px; }
+.unit-prog .bar { flex: 1; height: 10px; background: #e8eef7; border-radius: 999px; overflow: hidden; }
+.unit-prog .bar > div { height: 100%; background: var(--primary); border-radius: 999px; }
+.unit-prog .pct-txt { width: 46px; text-align: right; font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+
+/* ---------- History ---------- */
+.history-item {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px;
+}
+.history-item .date { color: var(--muted); font-size: 12.5px; }
+.history-item .score { font-weight: 800; font-size: 16px; color: var(--primary-dark); }
+
+/* ---------- Mistakes ---------- */
+.mistake-item {
+  background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--red);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
+}
+.mistake-item.mastered { border-left-color: var(--green); background: linear-gradient(to right, #f0fdf4, #ffffff); }
+.mistake-item .m-q { font-size: 15px; font-weight: 600; line-height: 1.55; margin: 8px 0 12px; }
+.mistake-item .m-ans { font-size: 13.5px; }
+.mistake-item .m-ans .yours { color: var(--red); text-decoration: line-through; }
+.mistake-item .m-ans .correct { color: var(--green); font-weight: 700; }
+.mistake-item .m-meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+/* ---------- Modals ---------- */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 1000;
+  align-items: center; justify-content: center; padding: 20px; }
+.overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 18px; padding: 26px 26px 22px; max-width: 480px;
+  width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(15,23,42,.28); }
+.modal h3 { font-size: 19px; margin-bottom: 12px; }
+.modal p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 18px; }
+.modal-actions .btn { flex: 1 1 auto; min-width: 110px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.form-group .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.checkbox-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; cursor: pointer; }
+.checkbox-row input { width: 17px; height: 17px; cursor: pointer; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; padding-top: 56px; }
+  .sidebar {
+    position: fixed; top: 56px; left: 0; bottom: 0; width: 250px; z-index: 90;
+    transform: translateX(-100%); transition: transform .25s ease;
+    height: auto; padding-bottom: 20px;
+  }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,.1); }
+  .mobile-bar {
+    display: flex; position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: #fff; border-bottom: 1px solid var(--border); align-items: center;
+    justify-content: space-between; padding: 0 16px; z-index: 100;
+  }
+  .mobile-bar .brand { padding: 0; font-size: 16px; }
+  .menu-toggle { background: transparent; border: none; font-size: 22px; padding: 4px 8px; }
+  .main { padding: 20px 16px 60px; }
+  .page-title { font-size: 22px; }
+  .vocab-grid, .dash-grid { grid-template-columns: 1fr; }
+  .flash-card { min-height: 260px; padding: 30px 20px; }
+  .flash-card .f-word { font-size: 28px; }
+  .q-card { padding: 20px 18px; }
+  .q-text { font-size: 16.5px; }
+  .result-hero .big { font-size: 40px; }
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,.4); z-index: 80;
+}
+.sidebar-backdrop.show { display: block; }
+@media (min-width: 901px) { .sidebar-backdrop { display: none !important; } }
+
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-state .big-ico { font-size: 46px; margin-bottom: 12px; }
+.empty-state h3 { color: var(--text); font-size: 18px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Mobile top bar -->
+  <div class="mobile-bar">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    <div class="brand">📚 Vocabulary</div>
+    <div style="width:30px"></div>
+  </div>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">📚 Vocabulary
+      <small>Unit 1–3 · Chapters 1–2</small>
+    </div>
+    <button class="nav-btn active" data-page="home"><span class="ico">🏠</span> Dashboard</button>
+    <button class="nav-btn" data-page="vocab"><span class="ico">📚</span> Vocabulary</button>
+    <button class="nav-btn" data-page="flash"><span class="ico">🃏</span> Flashcards</button>
+    <button class="nav-btn" data-page="practice"><span class="ico">✏️</span> Practice</button>
+    <button class="nav-btn" data-page="test"><span class="ico">📝</span> Test</button>
+    <button class="nav-btn" data-page="progress"><span class="ico">📊</span> Progress</button>
+    <button class="nav-btn" data-page="mistakes"><span class="ico">❌</span> Mistakes</button>
+    <div class="sidebar-footer">
+      <button class="nav-btn" id="resetBtn"><span class="ico">🔄</span> Reset Progress</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main" id="main"></main>
+</div>
+
+<!-- Modals -->
+<div class="overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. VOCABULARY DATA — 48 words
+   ============================================================ */
+const VOCAB = [
+  // ---- Unit 1 · Chapter 1 ----
+  {word:"encourage", ipa:"/ɪnˈkʌrɪdʒ/", pos:"v.", vi:"khuyến khích",
+   def:"to give someone confidence, for example, by letting them know that what they did is good",
+   ex:"When things aren't going well, he encourages me.", unit:1, chap:1},
+  {word:"hands-on", ipa:"/ˌhændzˈɒn/", pos:"adj.", vi:"thực hành trực tiếp",
+   def:"actually doing a particular thing, rather than just talking about it or getting someone else to do it",
+   ex:"Ninety-nine per cent of primary pupils now have hands-on experience of computers.", unit:1, chap:1},
+  {word:"healthy", ipa:"/ˈhelθi/", pos:"adj.", vi:"khỏe mạnh, lành mạnh",
+   def:"well and not suffering from any illness",
+   ex:"Most of us need to exercise more to be healthy.", unit:1, chap:1},
+  {word:"ingredients", ipa:"/ɪnˈɡriːdiənts/", pos:"n.", vi:"nguyên liệu",
+   def:"things that are used to make something, especially all the different foods you use when you are cooking a particular dish",
+   ex:"Mix together all the ingredients.", unit:1, chap:1},
+  {word:"kitchen", ipa:"/ˈkɪtʃɪn/", pos:"n.", vi:"nhà bếp",
+   def:"a room that is used for cooking and for household jobs such as washing dishes",
+   ex:"She was in the kitchen preparing dinner for the family.", unit:1, chap:1},
+  {word:"qualified", ipa:"/ˈkwɒlɪfaɪd/", pos:"adj.", vi:"có đủ trình độ/chuyên môn",
+   def:"someone who has the skills or experience in order to work in a particular profession",
+   ex:"There are not enough qualified teachers in the country.", unit:1, chap:1},
+  {word:"recipe", ipa:"/ˈresəpi/", pos:"n.", vi:"công thức nấu ăn",
+   def:"a document that describes how to cook something",
+   ex:"He got a recipe for chocolate cake from the cookbook.", unit:1, chap:1},
+  {word:"serve", ipa:"/sɜːv/", pos:"v.", vi:"phục vụ (đồ ăn, thức uống)",
+   def:"to give someone food and drinks",
+   ex:"Tonight the restaurant is serving a cold tomato soup.", unit:1, chap:1},
+
+  // ---- Unit 1 · Chapter 2 ----
+  {word:"add", ipa:"/æd/", pos:"v.", vi:"thêm vào",
+   def:"to put something in or on the other thing, to increase, complete, or improve it",
+   ex:"Add the cheese to the pasta sauce.", unit:1, chap:2},
+  {word:"bake", ipa:"/beɪk/", pos:"v.", vi:"nướng (bánh)",
+   def:"to cook in the oven without any extra liquid or fat",
+   ex:"Bake the cake for 35 to 50 minutes.", unit:1, chap:2},
+  {word:"check", ipa:"/tʃek/", pos:"v.", vi:"kiểm tra",
+   def:"to make sure that something is correct",
+   ex:"He checked that he had his room key.", unit:1, chap:2},
+  {word:"cool", ipa:"/kuːl/", pos:"v.", vi:"làm nguội, nguội đi",
+   def:"to become lower in temperature",
+   ex:"I waited for the fan to cool the room.", unit:1, chap:2},
+  {word:"melt", ipa:"/melt/", pos:"v.", vi:"làm tan chảy",
+   def:"to change to a liquid, usually when heated",
+   ex:"The snow had melted, but the lake was still frozen solid.", unit:1, chap:2},
+  {word:"mix", ipa:"/mɪks/", pos:"v.", vi:"trộn, hòa trộn",
+   def:"to stir or shake together, or combine in some other way, so that it becomes a single substance",
+   ex:"It mixes easily with cold or hot water to make a tasty drink.", unit:1, chap:2},
+  {word:"pour", ipa:"/pɔːr/", pos:"v.", vi:"đổ, rót",
+   def:"to make a liquid flow steadily out of a container by holding the container at an angle",
+   ex:"Heat the oil in a frying-pan, then pour in the egg mixture.", unit:1, chap:2},
+  {word:"spray", ipa:"/spreɪ/", pos:"v.", vi:"phun, xịt",
+   def:"to cover or scatter an area",
+   ex:"Remember to spray the flowers with water twice a day.", unit:1, chap:2},
+
+  // ---- Unit 2 · Chapter 1 ----
+  {word:"beat", ipa:"/biːt/", pos:"v.", vi:"đánh bại",
+   def:"to do better than someone in a competition",
+   ex:"In yesterday's games, Switzerland beat the United States two-one.", unit:2, chap:1},
+  {word:"champion", ipa:"/ˈtʃæmpiən/", pos:"n.", vi:"nhà vô địch",
+   def:"someone who has won the first prize in a competition, contest, or fight",
+   ex:"She is a champion boxer and wrestler.", unit:2, chap:1},
+  {word:"competitor", ipa:"/kəmˈpetɪtər/", pos:"n.", vi:"thí sinh, người tham gia",
+   def:"a person who takes part in a competition or contest",
+   ex:"Herbert Blocker of Germany, one of the oldest competitors, won the silver medal.", unit:2, chap:1},
+  {word:"confident", ipa:"/ˈkɒnfɪdənt/", pos:"adj.", vi:"tự tin",
+   def:"to be sure of your ability or idea, or that something is true",
+   ex:"I am confident that people will believe my story.", unit:2, chap:1},
+  {word:"confused", ipa:"/kənˈfjuːzd/", pos:"adj.", vi:"bối rối, lúng túng",
+   def:"not knowing exactly what is happening or what to do",
+   ex:"Things were happening too quickly and Brian was confused.", unit:2, chap:1},
+  {word:"machine", ipa:"/məˈʃiːn/", pos:"n.", vi:"máy móc",
+   def:"a piece of equipment which uses electricity or an engine in order to do a particular kind of work",
+   ex:"I put the coin in the machine and pressed the button.", unit:2, chap:1},
+  {word:"opponent", ipa:"/əˈpəʊnənt/", pos:"n.", vi:"đối thủ",
+   def:"in a contest, your opponent is the person who is playing against you",
+   ex:"Norris knocked down his opponent twice in the early rounds of the fight.", unit:2, chap:1},
+  {word:"wonder", ipa:"/ˈwʌndər/", pos:"n.", vi:"điều kỳ diệu",
+   def:"something that causes people to feel great surprise and admiration",
+   ex:"That building is a wonder.", unit:2, chap:1},
+
+  // ---- Unit 2 · Chapter 2 ----
+  {word:"discussion", ipa:"/dɪˈskʌʃən/", pos:"n.", vi:"cuộc thảo luận",
+   def:"a talk, often in order to reach a decision",
+   ex:"There was a lot of discussion about the report.", unit:2, chap:2},
+  {word:"during", ipa:"/ˈdjʊərɪŋ/", pos:"prep.", vi:"trong suốt, trong khoảng",
+   def:"If something happens during a period of time or an event, it happens continuously or several times between the beginning and end of that period or event.",
+   ex:"Storms are common during the summer.", unit:2, chap:2},
+  {word:"keep in touch", ipa:"/kiːp ɪn tʌtʃ/", pos:"expr.", vi:"giữ liên lạc",
+   def:"to maintain communications with someone or know how they are doing",
+   ex:"I still keep in touch with people I met in university.", unit:2, chap:2},
+  {word:"opinion", ipa:"/əˈpɪnjən/", pos:"n.", vi:"ý kiến",
+   def:"what you think or believe about something",
+   ex:"I wasn't asking for your opinion.", unit:2, chap:2},
+  {word:"surely", ipa:"/ˈʃʊərli/", pos:"adv.", vi:"chắc chắn, hẳn là",
+   def:"emphasizes that you think something should be true, and you would be surprised if it was not true",
+   ex:"If I can accept this situation, surely you can.", unit:2, chap:2},
+  {word:"temperature", ipa:"/ˈtemprətʃər/", pos:"n.", vi:"nhiệt độ",
+   def:"a measure of how hot or cold it is",
+   ex:"The temperature dropped at night.", unit:2, chap:2},
+  {word:"useful", ipa:"/ˈjuːsfəl/", pos:"adj.", vi:"hữu ích",
+   def:"something that can do something or help you do something",
+   ex:"This book might be useful for people who want to learn how to speak in public.", unit:2, chap:2},
+  {word:"vote", ipa:"/vəʊt/", pos:"v.", vi:"bỏ phiếu, bầu",
+   def:"to make your choice officially at a meeting or in an election, for example by raising your hand",
+   ex:"Nearly everyone voted for him at the company meeting.", unit:2, chap:2},
+
+  // ---- Unit 3 · Chapter 1 ----
+  {word:"abroad", ipa:"/əˈbrɔːd/", pos:"adv.", vi:"ở nước ngoài",
+   def:"a foreign country, usually one separated by an ocean or a sea",
+   ex:"I would love to go abroad this year, perhaps to the South of France.", unit:3, chap:1},
+  {word:"comfortable", ipa:"/ˈkʌmftəbəl/", pos:"adj.", vi:"thoải mái, dễ chịu",
+   def:"to feel confident and relaxed",
+   ex:"She wasn't very comfortable at the party because she didn't know anyone.", unit:3, chap:1},
+  {word:"culture", ipa:"/ˈkʌltʃər/", pos:"n.", vi:"văn hóa",
+   def:"the way of life or beliefs of a particular society or civilization",
+   ex:"We must learn to mix with people of different cultures.", unit:3, chap:1},
+  {word:"excellent", ipa:"/ˈeksələnt/", pos:"adj.", vi:"xuất sắc, rất tốt",
+   def:"very good",
+   ex:"She is excellent at her job.", unit:3, chap:1},
+  {word:"exciting", ipa:"/ɪkˈsaɪtɪŋ/", pos:"adj.", vi:"thú vị, gây phấn khích",
+   def:"something that makes you feel very happy or enthusiastic",
+   ex:"The race itself is very exciting.", unit:3, chap:1},
+  {word:"experience", ipa:"/ɪkˈspɪəriəns/", pos:"n.", vi:"trải nghiệm, kinh nghiệm",
+   def:"something that you do or that happens to you, especially something important that affects you",
+   ex:"He had a bad experience with a spider when he was young.", unit:3, chap:1},
+  {word:"make sure", ipa:"/meɪk ʃʊər/", pos:"expr.", vi:"đảm bảo, chắc chắn",
+   def:"check that something is the way you want it to be",
+   ex:"Make sure that you follow the instructions carefully.", unit:3, chap:1},
+  {word:"miss", ipa:"/mɪs/", pos:"v.", vi:"nhớ (ai đó)",
+   def:"to feel sad and wish someone you love was with you",
+   ex:"I really miss my sister, who is studying in another country.", unit:3, chap:1},
+
+  // ---- Unit 3 · Chapter 2 ----
+  {word:"awesome", ipa:"/ˈɔːsəm/", pos:"adj.", vi:"tuyệt vời, ấn tượng",
+   def:"someone or something that is very impressive",
+   ex:"The new restaurant has really awesome food.", unit:3, chap:2},
+  {word:"embarrassed", ipa:"/ɪmˈbærəst/", pos:"adj.", vi:"xấu hổ, ngượng ngùng",
+   def:"to feel shy, ashamed, or guilty about something",
+   ex:"He was embarrassed by the tear in his pants.", unit:3, chap:2},
+  {word:"hardly", ipa:"/ˈhɑːrdli/", pos:"adv.", vi:"hầu như không",
+   def:"emphasizes that something is very difficult to do",
+   ex:"My garden was covered with so many butterflies that I could hardly see the flowers.", unit:3, chap:2},
+  {word:"improve", ipa:"/ɪmˈpruːv/", pos:"v.", vi:"cải thiện",
+   def:"to get better at something",
+   ex:"He said he was going to improve his football.", unit:3, chap:2},
+  {word:"journal", ipa:"/ˈdʒɜːrnl/", pos:"n.", vi:"nhật ký",
+   def:"a record of activities you do every day",
+   ex:"I keep a journal of what I learned in English class.", unit:3, chap:2},
+  {word:"lots of", ipa:"/lɒts əv/", pos:"expr.", vi:"nhiều, rất nhiều",
+   def:"a large number of something",
+   ex:"We have lots of land to build whatever we want.", unit:3, chap:2},
+  {word:"practice", ipa:"/ˈpræktɪs/", pos:"v.", vi:"luyện tập",
+   def:"doing something regularly in order to be able to do it better",
+   ex:"I practice speaking English to my parents every day.", unit:3, chap:2},
+  {word:"shy", ipa:"/ʃaɪ/", pos:"adj.", vi:"nhút nhát",
+   def:"nervous and uncomfortable with other people",
+   ex:"She's so shy that she does not speak much to strangers.", unit:3, chap:2}
+];
+
+/* ============================================================
+   2. QUESTIONS DATA — 176 questions
+   parts: A=Word Form, B=Vocab in Context, C=Mixed Vocab,
+          D=Verb Forms, E=Mixed Verb Forms
+   ============================================================ */
+const QUESTIONS = [
+  /* ---------- PART A — WORD FORM (1-42) ---------- */
+  {id:1, part:"A", unit:1, chap:1, q:"Good teachers always ______ their students to speak English confidently.", opts:["encourage","encouraging","encouraged","encourages"], a:0, ex:"encourage + someone + to V. Chủ ngữ số nhiều 'teachers' → dùng V nguyên mẫu."},
+  {id:2, part:"A", unit:1, chap:1, q:"The course provides students with ______ experience in a real restaurant kitchen.", opts:["hand","hands","hands-on","handed"], a:2, ex:"'hands-on experience' = kinh nghiệm thực hành trực tiếp."},
+  {id:3, part:"A", unit:1, chap:1, q:"Regular exercise and a balanced diet are important for staying ______.", opts:["health","healthy","healthily","healthiness"], a:1, ex:"stay + adjective. 'healthy' = khỏe mạnh."},
+  {id:4, part:"A", unit:1, chap:1, q:"You need several fresh ______ to make this traditional Vietnamese dish.", opts:["ingredient","ingredients","ingredienting","ingredientses"], a:1, ex:"several + danh từ số nhiều → ingredients."},
+  {id:5, part:"A", unit:1, chap:1, q:"She is a very ______ cook who can prepare meals for a large family.", opts:["qualify","qualification","qualified","qualifying"], a:2, ex:"qualified (adj) = có đủ trình độ. Đứng trước danh từ 'cook'."},
+  {id:6, part:"A", unit:1, chap:1, q:"This cookbook contains many easy and delicious ______.", opts:["recipe","recipes","recipeing","recipies"], a:1, ex:"many + danh từ số nhiều → recipes."},
+  {id:7, part:"A", unit:1, chap:1, q:"The waiter was responsible for ______ food and drinks to the customers.", opts:["serve","served","serving","serves"], a:2, ex:"be responsible for + V-ing → serving."},
+  {id:8, part:"A", unit:1, chap:2, q:"The chef carefully ______ the cheese before putting it on the pizza.", opts:["melt","melts","melting","melted"], a:3, ex:"Hành động đã xảy ra trong quá khứ → past simple: melted."},
+  {id:9, part:"A", unit:1, chap:2, q:"Make sure that all the ingredients are well ______ before you put them in the oven.", opts:["mix","mixing","mixed","mixes"], a:2, ex:"Câu bị động: be + V3/ed → are well mixed."},
+  {id:10, part:"A", unit:1, chap:2, q:"The cake needs another ten minutes of ______.", opts:["bake","baked","baking","bakes"], a:2, ex:"Sau 'of' cần danh từ/V-ing → baking."},
+  {id:11, part:"A", unit:1, chap:2, q:"The teacher asked us to ______ our answers before submitting the test.", opts:["check","checked","checking","checks"], a:0, ex:"ask + someone + to V → to check."},
+  {id:12, part:"A", unit:1, chap:2, q:"The soup should be left to ______ before you eat it.", opts:["cool","cooled","cooling","cools"], a:0, ex:"leave + something + to V → leave to cool."},
+  {id:13, part:"A", unit:1, chap:2, q:"Be careful when ______ hot water into the glass.", opts:["pour","poured","pouring","pours"], a:2, ex:"Sau 'when' khi cùng chủ ngữ → V-ing → pouring."},
+  {id:14, part:"A", unit:1, chap:2, q:"The plants need regular ______ to keep insects away.", opts:["spray","sprayed","spraying","sprays"], a:2, ex:"need + noun/V-ing → regular spraying."},
+  {id:15, part:"A", unit:2, chap:1, q:"The young boxer was extremely ______ before the competition.", opts:["confidence","confident","confidently","confide"], a:1, ex:"be + adverb + adjective → extremely confident."},
+  {id:16, part:"A", unit:2, chap:1, q:"There were many strong ______ in the international competition.", opts:["compete","competition","competitors","competing"], a:2, ex:"many + danh từ số nhiều chỉ người → competitors."},
+  {id:17, part:"A", unit:2, chap:1, q:"The winner became the world ______ after defeating his opponent.", opts:["champion","championship","champions","championed"], a:0, ex:"become the world champion = trở thành nhà vô địch thế giới."},
+  {id:18, part:"A", unit:2, chap:1, q:"She played against a very experienced ______ in the final.", opts:["oppose","opposed","opponent","opposing"], a:2, ex:"opponent (n) = đối thủ. play against + opponent."},
+  {id:19, part:"A", unit:2, chap:2, q:"The students had a long ______ about whether the school should change its rules.", opts:["discuss","discussion","discussing","discussed"], a:1, ex:"have a discussion = có một cuộc thảo luận."},
+  {id:20, part:"A", unit:2, chap:2, q:"His ______ was that everyone should have more opportunities to practise English.", opts:["opine","opined","opinion","opining"], a:2, ex:"opinion (n) = ý kiến. His opinion was that..."},
+  {id:21, part:"A", unit:2, chap:2, q:"The new washing ______ can save a lot of electricity.", opts:["machine","machines","machining","machined"], a:0, ex:"'washing machine' = máy giặt. Đây là danh từ ghép."},
+  {id:22, part:"A", unit:2, chap:2, q:"The weather ______ reached 38°C yesterday.", opts:["temperate","temperature","temperately","temperatures"], a:1, ex:"temperature (n) = nhiệt độ. The temperature reached 38°C."},
+  {id:23, part:"A", unit:2, chap:2, q:"This dictionary is very ______ for English learners.", opts:["use","used","useful","using"], a:2, ex:"be + adjective → useful (hữu ích)."},
+  {id:24, part:"A", unit:2, chap:2, q:"Everyone ______ for the new class president.", opts:["vote","votes","voting","voted"], a:3, ex:"Hành động đã xảy ra → past simple: voted."},
+  {id:25, part:"A", unit:2, chap:2, q:"After the competition, the two players continued their ______ despite being rivals.", opts:["friend","friends","friendship","friendly"], a:2, ex:"friendship (n) = tình bạn. their friendship."},
+  {id:26, part:"A", unit:2, chap:1, q:"He looked ______ because he did not understand what was happening.", opts:["confuse","confusing","confused","confuses"], a:2, ex:"look + adjective. 'confused' = cảm thấy bối rối (người cảm thấy)."},
+  {id:27, part:"A", unit:3, chap:1, q:"Travelling ______ can help students understand different cultures.", opts:["abroad","abroads","abroadly","abroadness"], a:0, ex:"abroad (adv) = ở nước ngoài. travel abroad."},
+  {id:28, part:"A", unit:3, chap:1, q:"It took me several weeks to feel ______ in my new school.", opts:["comfort","comfortable","comfortably","comforting"], a:1, ex:"feel + adjective → comfortable."},
+  {id:29, part:"A", unit:3, chap:1, q:"Learning about another country's ______ can be very interesting.", opts:["cultural","culturally","culture","cultured"], a:2, ex:"Sau 'another country's' cần danh từ → culture."},
+  {id:30, part:"A", unit:3, chap:1, q:"She gave an ______ presentation about her trip to France.", opts:["excite","excited","exciting","excitement"], a:2, ex:"'exciting presentation' = bài thuyết trình thú vị (vật gây cảm xúc)."},
+  {id:31, part:"A", unit:3, chap:1, q:"The students had an unforgettable ______ while studying abroad.", opts:["experience","experiences","experienced","experiencing"], a:0, ex:"an unforgettable experience = một trải nghiệm khó quên (số ít)."},
+  {id:32, part:"A", unit:3, chap:1, q:"The restaurant received ______ reviews from its customers.", opts:["excellence","excellent","excellently","excelled"], a:1, ex:"excellent (adj) + noun → excellent reviews."},
+  {id:33, part:"A", unit:3, chap:1, q:"Please ______ that you have locked the door before leaving.", opts:["sure","surely","make sure","sureness"], a:2, ex:"make sure that... = đảm bảo rằng..."},
+  {id:34, part:"A", unit:3, chap:1, q:"I really ______ my family when I am away from home.", opts:["miss","missed","missing","misses"], a:0, ex:"miss (v) = nhớ. Chủ ngữ 'I' → miss nguyên mẫu."},
+  {id:35, part:"A", unit:3, chap:2, q:"The concert was absolutely ______. Everyone enjoyed it.", opts:["awesome","awesomely","awesomeness","awesomes"], a:0, ex:"be + adverb + adjective → awesome."},
+  {id:36, part:"A", unit:3, chap:2, q:"He felt ______ when he made a mistake in front of the whole class.", opts:["embarrass","embarrassing","embarrassed","embarrassment"], a:2, ex:"feel + adjective chỉ cảm xúc của người → embarrassed."},
+  {id:37, part:"A", unit:3, chap:2, q:"She could ______ hear the teacher because the students were making so much noise.", opts:["hard","hardly","harder","hardest"], a:1, ex:"hardly (adv) = hầu như không. could hardly + V."},
+  {id:38, part:"A", unit:3, chap:2, q:"Practising every day can help you ______ your English speaking skills.", opts:["improvement","improve","improved","improving"], a:1, ex:"help + object + V → help you improve."},
+  {id:39, part:"A", unit:3, chap:2, q:"Keeping a learning ______ is a good way to record your progress.", opts:["journal","journals","journalist","journaling"], a:0, ex:"'learning journal' = nhật ký học tập."},
+  {id:40, part:"A", unit:3, chap:2, q:"Regular ______ is necessary if you want to become fluent in English.", opts:["practical","practically","practice","practising"], a:2, ex:"Sau 'regular' cần danh từ → practice (n) = sự luyện tập."},
+  {id:41, part:"A", unit:3, chap:2, q:"Her ______ made it difficult for her to talk to new classmates.", opts:["shy","shyly","shyness","shyer"], a:2, ex:"shyness (n) = sự nhút nhát. Her shyness."},
+  {id:42, part:"A", unit:3, chap:2, q:"There are ______ of interesting places to visit in this city.", opts:["lot","lots","lotting","lotes"], a:1, ex:"lots of + noun = nhiều."},
+
+  /* ---------- PART B — VOCABULARY IN CONTEXT (43-90) ---------- */
+  {id:43, part:"B", unit:1, chap:1, q:"My mother spends a lot of time in the ______ preparing meals for the family.", opts:["kitchen","recipe","qualified","serve"], a:0, ex:"kitchen = nhà bếp, nơi nấu ăn."},
+  {id:44, part:"B", unit:1, chap:1, q:"The teacher always tries to ______ students when they make an effort.", opts:["encourage","qualified","serve","hands-on"], a:0, ex:"encourage someone = khuyến khích ai đó."},
+  {id:45, part:"B", unit:1, chap:1, q:"You need fresh ______ to make a good vegetable soup.", opts:["ingredients","kitchen","recipe","qualified"], a:0, ex:"ingredients = nguyên liệu để nấu ăn."},
+  {id:46, part:"B", unit:1, chap:1, q:"The school offers ______ training so students can learn by actually doing the work.", opts:["hands-on","healthy","recipe","serve"], a:0, ex:"hands-on training = đào tạo thực hành."},
+  {id:47, part:"B", unit:1, chap:1, q:"A ______ diet should include plenty of vegetables and fruit.", opts:["healthy","qualified","hands-on","recipe"], a:0, ex:"healthy diet = chế độ ăn lành mạnh."},
+  {id:48, part:"B", unit:1, chap:1, q:"The restaurant will ______ dinner from 6:00 p.m. to 10:00 p.m.", opts:["serve","kitchen","recipe","encourage"], a:0, ex:"serve dinner = phục vụ bữa tối."},
+  {id:49, part:"B", unit:1, chap:1, q:"We need a ______ teacher who has enough experience to teach this course.", opts:["qualified","hands-on","recipe","encourage"], a:0, ex:"qualified teacher = giáo viên có đủ trình độ."},
+  {id:50, part:"B", unit:1, chap:1, q:"I found a simple ______ for making chocolate cake online.", opts:["recipe","kitchen","healthy","serve"], a:0, ex:"recipe = công thức nấu ăn."},
+  {id:51, part:"B", unit:1, chap:2, q:"First, ______ the flour and sugar together in a large bowl.", opts:["mix","bake","pour","spray"], a:0, ex:"mix = trộn. mix A and B together."},
+  {id:52, part:"B", unit:1, chap:2, q:"______ the cake in the oven for about 40 minutes.", opts:["Bake","Mix","Pour","Spray"], a:0, ex:"bake = nướng (bánh) trong lò."},
+  {id:53, part:"B", unit:1, chap:2, q:"Please ______ the door before you leave the house.", opts:["check","cool","melt","spray"], a:0, ex:"check = kiểm tra. check the door."},
+  {id:54, part:"B", unit:1, chap:2, q:"Let the coffee ______ for a few minutes before drinking it.", opts:["cool","bake","mix","add"], a:0, ex:"cool = nguội đi."},
+  {id:55, part:"B", unit:1, chap:2, q:"The ice will ______ if you leave it in the sun.", opts:["melt","cool","add","spray"], a:0, ex:"melt = tan chảy."},
+  {id:56, part:"B", unit:1, chap:2, q:"______ some salt to the soup to improve the taste.", opts:["Add","Melt","Bake","Pour"], a:0, ex:"add A to B = thêm A vào B."},
+  {id:57, part:"B", unit:1, chap:2, q:"Carefully ______ the milk into the bowl.", opts:["pour","bake","melt","spray"], a:0, ex:"pour = đổ, rót. pour A into B."},
+  {id:58, part:"B", unit:1, chap:2, q:"Remember to ______ the plants with water every morning.", opts:["spray","bake","pour","mix"], a:0, ex:"spray = phun, xịt. spray the plants with water."},
+  {id:59, part:"B", unit:2, chap:1, q:"The tennis player managed to ______ his strongest rival in the final.", opts:["beat","champion","competitor","opponent"], a:0, ex:"beat = đánh bại. beat an opponent."},
+  {id:60, part:"B", unit:2, chap:1, q:"She became the national ______ after winning the competition.", opts:["champion","opponent","competitor","beat"], a:0, ex:"champion = nhà vô địch."},
+  {id:61, part:"B", unit:2, chap:1, q:"Every ______ must register before the competition begins.", opts:["competitor","champion","opponent","wonder"], a:0, ex:"competitor = người tham gia cuộc thi."},
+  {id:62, part:"B", unit:2, chap:1, q:"He felt ______ because he had prepared very carefully for the exam.", opts:["confident","confused","competitor","opponent"], a:0, ex:"confident = tự tin."},
+  {id:63, part:"B", unit:2, chap:1, q:"I was completely ______ by the complicated instructions.", opts:["confused","confident","champion","machine"], a:0, ex:"confused = bối rối, không hiểu."},
+  {id:64, part:"B", unit:2, chap:1, q:"This ______ can produce hundreds of bottles every hour.", opts:["machine","opponent","champion","wonder"], a:0, ex:"machine = máy móc."},
+  {id:65, part:"B", unit:2, chap:1, q:"His ______ was much taller and stronger than him.", opts:["opponent","champion","machine","competitor"], a:0, ex:"opponent = đối thủ."},
+  {id:66, part:"B", unit:2, chap:1, q:"The ancient temple is considered a natural ______ by many visitors.", opts:["wonder","machine","opponent","competitor"], a:0, ex:"wonder = điều kỳ diệu."},
+  {id:67, part:"B", unit:2, chap:2, q:"We had a long ______ about the advantages and disadvantages of studying abroad.", opts:["discussion","opinion","vote","temperature"], a:0, ex:"have a discussion = có cuộc thảo luận."},
+  {id:68, part:"B", unit:2, chap:2, q:"Please do not use your phone ______ the examination.", opts:["during","surely","useful","temperature"], a:0, ex:"during + noun = trong suốt."},
+  {id:69, part:"B", unit:2, chap:2, q:"Although we live far apart, we still ______ with each other through social media.", opts:["keep in touch","vote","useful","during"], a:0, ex:"keep in touch with someone = giữ liên lạc."},
+  {id:70, part:"B", unit:2, chap:2, q:"In my ______, students should have more opportunities to practise speaking.", opts:["opinion","discussion","vote","temperature"], a:0, ex:"in my opinion = theo ý kiến của tôi."},
+  {id:71, part:"B", unit:2, chap:2, q:"If she studied harder, ______ she would get better results.", opts:["surely","useful","during","temperature"], a:0, ex:"surely = chắc chắn (nhấn mạnh)."},
+  {id:72, part:"B", unit:2, chap:2, q:"The ______ dropped dramatically during the night.", opts:["temperature","opinion","discussion","vote"], a:0, ex:"temperature = nhiệt độ."},
+  {id:73, part:"B", unit:2, chap:2, q:"This website is very ______ for students who are learning English.", opts:["useful","surely","during","temperature"], a:0, ex:"useful = hữu ích."},
+  {id:74, part:"B", unit:2, chap:2, q:"Everyone had the opportunity to ______ in the student election.", opts:["vote","discussion","opinion","temperature"], a:0, ex:"vote = bỏ phiếu."},
+  {id:75, part:"B", unit:3, chap:1, q:"My brother is studying ______ in Australia this year.", opts:["abroad","comfortable","culture","excellent"], a:0, ex:"study abroad = học ở nước ngoài."},
+  {id:76, part:"B", unit:3, chap:1, q:"I felt very ______ after talking to my new classmates.", opts:["comfortable","abroad","exciting","miss"], a:0, ex:"feel comfortable = cảm thấy thoải mái."},
+  {id:77, part:"B", unit:3, chap:1, q:"Travelling is a great way to learn about another country's ______.", opts:["culture","abroad","comfortable","miss"], a:0, ex:"culture = văn hóa."},
+  {id:78, part:"B", unit:3, chap:1, q:"The hotel received ______ reviews from tourists.", opts:["excellent","abroad","exciting","culture"], a:0, ex:"excellent reviews = đánh giá xuất sắc."},
+  {id:79, part:"B", unit:3, chap:1, q:"Riding a roller coaster can be a very ______ experience.", opts:["exciting","comfortable","abroad","miss"], a:0, ex:"exciting = thú vị, gây phấn khích."},
+  {id:80, part:"B", unit:3, chap:1, q:"Working with international students was a valuable ______ for me.", opts:["experience","culture","abroad","comfortable"], a:0, ex:"experience = trải nghiệm."},
+  {id:81, part:"B", unit:3, chap:1, q:"______ that you bring your passport before going to the airport.", opts:["Make sure","Miss","Abroad","Culture"], a:0, ex:"Make sure that... = Hãy đảm bảo rằng..."},
+  {id:82, part:"B", unit:3, chap:1, q:"I really ______ my parents when I am away from home.", opts:["miss","make sure","abroad","culture"], a:0, ex:"miss someone = nhớ ai đó."},
+  {id:83, part:"B", unit:3, chap:2, q:"The view from the top of the mountain was ______.", opts:["awesome","embarrassed","shy","hardly"], a:0, ex:"awesome = tuyệt vời, ấn tượng."},
+  {id:84, part:"B", unit:3, chap:2, q:"She felt ______ when she forgot her friend's name.", opts:["embarrassed","awesome","shy","hardly"], a:0, ex:"embarrassed = cảm thấy ngượng/xấu hổ."},
+  {id:85, part:"B", unit:3, chap:2, q:"I was so tired that I could ______ keep my eyes open.", opts:["hardly","awesome","shy","practice"], a:0, ex:"hardly = hầu như không."},
+  {id:86, part:"B", unit:3, chap:2, q:"You need to ______ your pronunciation if you want to speak more naturally.", opts:["improve","awesome","embarrassed","shy"], a:0, ex:"improve = cải thiện."},
+  {id:87, part:"B", unit:3, chap:2, q:"I write in my English ______ every evening.", opts:["journal","practice","awesome","shy"], a:0, ex:"journal = nhật ký."},
+  {id:88, part:"B", unit:3, chap:2, q:"There are ______ interesting books in the library.", opts:["lots of","hardly","shy","awesome"], a:0, ex:"lots of + noun = nhiều."},
+  {id:89, part:"B", unit:3, chap:2, q:"You need regular ______ to become good at speaking English.", opts:["practice","journal","shy","awesome"], a:0, ex:"practice (n) = sự luyện tập."},
+  {id:90, part:"B", unit:3, chap:2, q:"He is very ______ and doesn't like speaking in front of large groups.", opts:["shy","awesome","hardly","embarrassed"], a:0, ex:"shy = nhút nhát."},
+
+  /* ---------- PART C — MIXED VOCABULARY (91-110) ---------- */
+  {id:91, part:"C", unit:1, chap:1, q:"The teacher gave us real tasks instead of only explaining the theory. We had ______ experience.", opts:["hands-on","healthy","qualified","recipe"], a:0, ex:"hands-on experience = kinh nghiệm thực hành trực tiếp."},
+  {id:92, part:"C", unit:2, chap:1, q:"I couldn't understand the instructions, so I felt completely ______.", opts:["confused","confident","champion","opponent"], a:0, ex:"confused = bối rối, không hiểu."},
+  {id:93, part:"C", unit:3, chap:1, q:"My brother is studying ______ because he wants to experience a different educational system.", opts:["abroad","comfortable","culture","excellent"], a:0, ex:"study abroad = học ở nước ngoài."},
+  {id:94, part:"C", unit:1, chap:2, q:"The chef asked me to ______ the vegetables before adding them to the soup.", opts:["mix","bake","pour","spray"], a:0, ex:"mix = trộn."},
+  {id:95, part:"C", unit:2, chap:2, q:"Even though the two friends live in different countries, they still ______.", opts:["keep in touch","vote","discuss","wonder"], a:0, ex:"keep in touch = giữ liên lạc."},
+  {id:96, part:"C", unit:2, chap:1, q:"The athlete was very ______ because she had trained for several months.", opts:["confident","confused","embarrassed","shy"], a:0, ex:"confident = tự tin."},
+  {id:97, part:"C", unit:3, chap:1, q:"You should ______ that you have all your documents before travelling.", opts:["make sure","miss","keep in touch","wonder"], a:0, ex:"make sure = đảm bảo."},
+  {id:98, part:"C", unit:3, chap:2, q:"This course helped me ______ my English pronunciation.", opts:["improve","awesome","journal","practice"], a:0, ex:"improve = cải thiện."},
+  {id:99, part:"C", unit:1, chap:1, q:"The restaurant uses fresh ______ to prepare all its dishes.", opts:["ingredients","recipes","kitchens","machines"], a:0, ex:"ingredients = nguyên liệu."},
+  {id:100, part:"C", unit:3, chap:2, q:"I was very ______ when everyone laughed after I made a pronunciation mistake.", opts:["embarrassed","awesome","confident","useful"], a:0, ex:"embarrassed = xấu hổ, ngượng."},
+  {id:101, part:"C", unit:2, chap:1, q:"The two players shook hands after the match even though one was the other's ______.", opts:["opponent","champion","competitor","machine"], a:0, ex:"opponent = đối thủ."},
+  {id:102, part:"C", unit:3, chap:2, q:"She keeps a ______ to record new English vocabulary every day.", opts:["journal","recipe","culture","machine"], a:0, ex:"journal = nhật ký."},
+  {id:103, part:"C", unit:1, chap:1, q:"The teacher tried to ______ us to speak English without being afraid of mistakes.", opts:["encourage","serve","bake","pour"], a:0, ex:"encourage someone = khuyến khích ai."},
+  {id:104, part:"C", unit:3, chap:2, q:"The food was ______, so everyone wanted to order more.", opts:["awesome","hardly","shy","embarrassed"], a:0, ex:"awesome = tuyệt vời."},
+  {id:105, part:"C", unit:2, chap:2, q:"The ______ in the room was too high, so we turned on the air conditioner.", opts:["temperature","opinion","discussion","vote"], a:0, ex:"temperature = nhiệt độ."},
+  {id:106, part:"C", unit:1, chap:2, q:"You should ______ your answers carefully before handing in the test.", opts:["check","cool","melt","spray"], a:0, ex:"check = kiểm tra."},
+  {id:107, part:"C", unit:2, chap:1, q:"He won the final and became the competition's ______.", opts:["champion","opponent","competitor","machine"], a:0, ex:"champion = nhà vô địch."},
+  {id:108, part:"C", unit:2, chap:2, q:"The students had a heated ______ about whether uniforms should be compulsory.", opts:["discussion","opinion","vote","temperature"], a:0, ex:"discussion = cuộc thảo luận."},
+  {id:109, part:"C", unit:2, chap:2, q:"This app is very ______ for students who want to practise English.", opts:["useful","surely","during","hardly"], a:0, ex:"useful = hữu ích."},
+  {id:110, part:"C", unit:3, chap:2, q:"I could ______ hear what the teacher was saying because of the noise.", opts:["hardly","hard","harder","hardest"], a:0, ex:"hardly = hầu như không."},
+
+  /* ---------- PART D — VERB FORMS (111-156) ---------- */
+  {id:111, part:"D", unit:1, chap:1, q:"My English teacher always ______ me when I make progress.", opts:["encourages","encourage","encouraged","encouraging"], a:0, ex:"'My English teacher' số ít + usually/always → V-s."},
+  {id:112, part:"D", unit:1, chap:1, q:"The students ______ hands-on activities every Friday.", opts:["have","has","having","had"], a:0, ex:"students số nhiều → have."},
+  {id:113, part:"D", unit:1, chap:1, q:"She usually ______ healthy meals for her family.", opts:["prepares","prepare","prepared","preparing"], a:0, ex:"she + usually → V-s."},
+  {id:114, part:"D", unit:1, chap:1, q:"The chef ______ the ingredients carefully before cooking.", opts:["checks","check","checked","checking"], a:0, ex:"chef số ít → checks."},
+  {id:115, part:"D", unit:1, chap:1, q:"We ______ the vegetables in the kitchen at the moment.", opts:["are cutting","cut","cuts","were cutting"], a:0, ex:"at the moment → present continuous."},
+  {id:116, part:"D", unit:1, chap:2, q:"My mother ______ a chocolate cake yesterday.", opts:["baked","bakes","baking","bake"], a:0, ex:"yesterday → past simple."},
+  {id:117, part:"D", unit:1, chap:2, q:"Please ______ some salt to the soup.", opts:["add","adds","added","adding"], a:0, ex:"Câu mệnh lệnh → V nguyên mẫu."},
+  {id:118, part:"D", unit:1, chap:2, q:"The chef ______ the ingredients together before putting them in the oven.", opts:["mixed","mixes","mixing","mix"], a:0, ex:"Hành động hoàn thành → past simple."},
+  {id:119, part:"D", unit:1, chap:2, q:"She ______ the butter in a small pan right now.", opts:["is melting","melts","melted","melt"], a:0, ex:"right now → present continuous."},
+  {id:120, part:"D", unit:1, chap:2, q:"The waiter ______ the customers their food at the moment.", opts:["is serving","serves","served","serve"], a:0, ex:"at the moment → present continuous."},
+  {id:121, part:"D", unit:1, chap:2, q:"He carefully ______ the milk into the bowl yesterday.", opts:["poured","pours","pouring","pour"], a:0, ex:"yesterday → past simple."},
+  {id:122, part:"D", unit:1, chap:2, q:"We ______ the flowers every morning.", opts:["spray","sprays","sprayed","spraying"], a:0, ex:"every morning → present simple."},
+  {id:123, part:"D", unit:1, chap:2, q:"Please wait until the cake ______ before you eat it.", opts:["cools","cool","cooled","is cooling"], a:0, ex:"Sau 'until' nói về tương lai dùng present simple → cools."},
+  {id:124, part:"D", unit:1, chap:2, q:"She ______ the recipe twice before starting to cook.", opts:["checked","checks","checking","check"], a:0, ex:"Hành động đã hoàn thành → past simple."},
+  {id:125, part:"D", unit:2, chap:1, q:"Switzerland ______ the United States two–one in yesterday's match.", opts:["beat","beaten","beats","beating"], a:0, ex:"beat (past) giống nguyên mẫu, không phải 'beated'."},
+  {id:126, part:"D", unit:2, chap:1, q:"She ______ the competition last year and became the national champion.", opts:["won","wins","winning","win"], a:0, ex:"last year → past simple. win → won."},
+  {id:127, part:"D", unit:2, chap:1, q:"More than 100 competitors ______ in the competition last weekend.", opts:["competed","compete","competes","competing"], a:0, ex:"last weekend → past simple."},
+  {id:128, part:"D", unit:2, chap:1, q:"He usually ______ very confident before an important match.", opts:["feels","feel","felt","feeling"], a:0, ex:"he + usually → feels."},
+  {id:129, part:"D", unit:2, chap:1, q:"The students ______ confused when the teacher changed the instructions.", opts:["became","become","becomes","becoming"], a:0, ex:"Hành động đã xảy ra → past simple."},
+  {id:130, part:"D", unit:2, chap:1, q:"This machine ______ electricity to operate.", opts:["uses","use","used","using"], a:0, ex:"machine số ít → uses."},
+  {id:131, part:"D", unit:2, chap:1, q:"The boxer ______ his opponent twice in the early rounds.", opts:["knocked","knocks","knocking","knock"], a:0, ex:"Hành động trong trận đấu đã qua → past simple."},
+  {id:132, part:"D", unit:2, chap:1, q:"I ______ at that amazing building when I visited London last year.", opts:["wondered","wonder","wonders","wondering"], a:0, ex:"last year → past simple."},
+  {id:133, part:"D", unit:2, chap:2, q:"We ______ about the problem when the teacher entered the room.", opts:["were discussing","discussed","discuss","are discussing"], a:0, ex:"Hành động đang diễn ra → past continuous."},
+  {id:134, part:"D", unit:2, chap:2, q:"They usually ______ in touch with their former classmates.", opts:["keep","keeps","kept","keeping"], a:0, ex:"they + usually → keep."},
+  {id:135, part:"D", unit:2, chap:2, q:"She ______ my opinion during the discussion yesterday.", opts:["asked","asks","ask","asking"], a:0, ex:"yesterday → past simple."},
+  {id:136, part:"D", unit:2, chap:2, q:"I ______ that everyone should have the same opportunity.", opts:["think","thinks","thought","thinking"], a:0, ex:"Quan điểm hiện tại → think."},
+  {id:137, part:"D", unit:2, chap:2, q:"Surely he ______ what the teacher means.", opts:["understands","understand","understood","understanding"], a:0, ex:"he → V-s."},
+  {id:138, part:"D", unit:2, chap:2, q:"The temperature ______ sharply last night.", opts:["dropped","drops","drop","dropping"], a:0, ex:"last night → past simple."},
+  {id:139, part:"D", unit:2, chap:2, q:"This website ______ very useful for English learners.", opts:["is","are","was","were"], a:0, ex:"website số ít → is."},
+  {id:140, part:"D", unit:2, chap:2, q:"Almost everyone ______ for the new class president yesterday.", opts:["voted","votes","vote","voting"], a:0, ex:"yesterday → past simple."},
+  {id:141, part:"D", unit:3, chap:1, q:"My brother ______ abroad next year.", opts:["will study","studies","studied","is studying"], a:0, ex:"next year → will + V."},
+  {id:142, part:"D", unit:3, chap:1, q:"She gradually ______ comfortable speaking English with foreigners.", opts:["became","becomes","become","becoming"], a:0, ex:"Quá trình đã xảy ra → became."},
+  {id:143, part:"D", unit:3, chap:1, q:"We ______ many different cultures during our trip last summer.", opts:["experienced","experience","experiences","experiencing"], a:0, ex:"last summer → past simple."},
+  {id:144, part:"D", unit:3, chap:1, q:"The students ______ very excited about their trip.", opts:["were","was","are","is"], a:0, ex:"students số nhiều + quá khứ → were."},
+  {id:145, part:"D", unit:3, chap:1, q:"He ______ an excellent presentation yesterday.", opts:["gave","gives","give","giving"], a:0, ex:"yesterday → past simple. give → gave."},
+  {id:146, part:"D", unit:3, chap:1, q:"Travelling abroad ______ an exciting experience for many students.", opts:["is","are","were","was"], a:0, ex:"Gerund 'Travelling abroad' → chủ ngữ số ít → is."},
+  {id:147, part:"D", unit:3, chap:1, q:"Please ______ sure that you bring your passport.", opts:["make","makes","made","making"], a:0, ex:"Câu mệnh lệnh → V nguyên mẫu."},
+  {id:148, part:"D", unit:3, chap:1, q:"I ______ my family whenever I am away from home.", opts:["miss","misses","missed","missing"], a:0, ex:"I → miss."},
+  {id:149, part:"D", unit:3, chap:2, q:"They ______ an awesome time at the beach last weekend.", opts:["had","have","has","having"], a:0, ex:"last weekend → had. have a great time."},
+  {id:150, part:"D", unit:3, chap:2, q:"She ______ embarrassed when she made a mistake in front of the class.", opts:["felt","feels","feel","feeling"], a:0, ex:"Hành động đã qua → felt."},
+  {id:151, part:"D", unit:3, chap:2, q:"I could hardly ______ the teacher because the students were talking loudly.", opts:["hear","heard","hearing","hears"], a:0, ex:"Sau modal 'could' → V nguyên mẫu."},
+  {id:152, part:"D", unit:3, chap:2, q:"He ______ his English by practising every day.", opts:["improves","improve","improved","improving"], a:0, ex:"he → V-s."},
+  {id:153, part:"D", unit:3, chap:2, q:"She ______ a journal every evening.", opts:["writes","write","wrote","writing"], a:0, ex:"she + every evening → V-s."},
+  {id:154, part:"D", unit:3, chap:2, q:"We ______ lots of English vocabulary in this course so far.", opts:["have learned","learned","learn","are learning"], a:0, ex:"'so far' → present perfect."},
+  {id:155, part:"D", unit:3, chap:2, q:"He ______ speaking English every day to improve his fluency.", opts:["practises","practise","practised","practising"], a:0, ex:"British English: practise (verb). he → practises."},
+  {id:156, part:"D", unit:3, chap:2, q:"The shy student ______ much during the first lesson.", opts:["didn't speak","doesn't speak","not spoke","wasn't speaking"], a:0, ex:"Quá khứ phủ định: didn't + V."},
+
+  /* ---------- PART E — MIXED VERB FORMS (157-176) ---------- */
+  {id:157, part:"E", unit:1, chap:1, q:"When I was younger, my parents ______ me to practise English every day.", opts:["encouraged","encourage","encourages","encouraging"], a:0, ex:"When I was younger → past simple."},
+  {id:158, part:"E", unit:1, chap:2, q:"Look! The chef ______ the ingredients into a large bowl.", opts:["is mixing","mixes","mixed","mix"], a:0, ex:"Look! → present continuous."},
+  {id:159, part:"E", unit:1, chap:2, q:"We ______ the cake for 40 minutes yesterday.", opts:["baked","bake","bakes","baking"], a:0, ex:"yesterday → past simple."},
+  {id:160, part:"E", unit:2, chap:2, q:"The students ______ a discussion when the teacher came into the classroom.", opts:["were having","had","have","are having"], a:0, ex:"Past continuous + when + past simple."},
+  {id:161, part:"E", unit:3, chap:1, q:"I ______ my best friend while I was studying abroad.", opts:["met","meet","meets","meeting"], a:0, ex:"Sự kiện trong quá khứ → met."},
+  {id:162, part:"E", unit:2, chap:2, q:"She ______ in touch with her university friends since graduation.", opts:["has kept","kept","keeps","keep"], a:0, ex:"since + mốc thời gian → present perfect."},
+  {id:163, part:"E", unit:2, chap:1, q:"He ______ very confident after he won his first competition.", opts:["became","becomes","become","becoming"], a:0, ex:"Hai hành động quá khứ → became."},
+  {id:164, part:"E", unit:2, chap:2, q:"The temperature ______ rapidly over the past few hours.", opts:["has dropped","dropped","drops","is dropping"], a:0, ex:"over the past few hours → present perfect."},
+  {id:165, part:"E", unit:3, chap:2, q:"I ______ English for several years, and I still want to improve.", opts:["have studied","studied","study","am studying"], a:0, ex:"for + khoảng thời gian → present perfect."},
+  {id:166, part:"E", unit:3, chap:1, q:"Make sure you ______ the instructions before you start the exercise.", opts:["read","reads","reading","have read"], a:0, ex:"Sau 'you' → read (present)."},
+  {id:167, part:"E", unit:3, chap:2, q:"She ______ her English speaking skills by practising with native speakers.", opts:["has improved","improved","improves","is improving"], a:0, ex:"Quá trình cải thiện đến hiện tại → present perfect."},
+  {id:168, part:"E", unit:3, chap:1, q:"We ______ lots of interesting people during our trip last summer.", opts:["met","meet","have met","meeting"], a:0, ex:"during our trip (quá khứ) → past simple."},
+  {id:169, part:"E", unit:3, chap:2, q:"He ______ embarrassed when everyone laughed at his mistake.", opts:["felt","feels","feel","feeling"], a:0, ex:"Sự việc đã qua → felt."},
+  {id:170, part:"E", unit:3, chap:1, q:"They ______ abroad for three years before returning to Vietnam.", opts:["had lived","lived","have lived","live"], a:0, ex:"Hành động trước một hành động quá khứ khác → past perfect."},
+  {id:171, part:"E", unit:3, chap:2, q:"I ______ in my English journal when my friend called me last night.", opts:["was writing","wrote","write","am writing"], a:0, ex:"Đang viết → was writing (past continuous)."},
+  {id:172, part:"E", unit:2, chap:1, q:"The students ______ the competition before they went home.", opts:["had finished","finished","finish","have finished"], a:0, ex:"finish xảy ra trước went → past perfect."},
+  {id:173, part:"E", unit:3, chap:2, q:"If you practise regularly, you ______ more confident when speaking English.", opts:["will become","become","became","would become"], a:0, ex:"First conditional: If + present simple, will + V."},
+  {id:174, part:"E", unit:1, chap:1, q:"She usually ______ healthy meals, but today she ______ a pizza.", opts:["prepares / is ordering","is preparing / orders","prepared / ordered","prepares / orders"], a:0, ex:"usually → present simple; today (tạm thời) → present continuous."},
+  {id:175, part:"E", unit:1, chap:2, q:"While we ______ dinner, the waiter ______ the drinks.", opts:["were eating / was serving","ate / served","eat / serves","are eating / is serving"], a:0, ex:"While + past continuous (hai hành động cùng diễn ra)."},
+  {id:176, part:"E", unit:2, chap:2, q:"By the time the teacher arrived, the students ______ the discussion.", opts:["had started","started","start","have started"], a:0, ex:"By the time + past simple → hành động trước dùng past perfect."}
+];
+
+/* ============================================================
+   3. STATE + LOCALSTORAGE
+   ============================================================ */
+const LS_KEY = "vocabApp_state_v1";
+
+const defaultState = {
+  favorites: [],        // word strings
+  mastered: [],         // word strings
+  flashKnown: {},       // word -> true
+  flashUnknown: {},     // word -> count
+  mistakes: {},         // questionId -> { wrongCount, lastDate, mastered }
+  practiceHistory: [],
+  testHistory: [],
+  lastStudy: null
+};
+
+let appState = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      return Object.assign({}, defaultState, p);
+    }
+  } catch(e) { console.warn(e); }
+  return JSON.parse(JSON.stringify(defaultState));
+}
+function saveState() {
+  appState.lastStudy = new Date().toISOString();
+  try { localStorage.setItem(LS_KEY, JSON.stringify(appState)); } catch(e) { console.warn(e); }
+}
+function resetProgress() {
+  appState = JSON.parse(JSON.stringify(defaultState));
+  saveState();
+}
+
+/* ============================================================
+   4. HELPERS
+   ============================================================ */
+const $ = (sel) => document.querySelector(sel);
+const main = $("#main");
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Shuffle options of a question, keeping correct answer index in sync. */
+function shuffleQuestion(q) {
+  const correctText = q.opts[q.a];
+  const shuffled = shuffle(q.opts);
+  return { ...q, opts: shuffled, a: shuffled.indexOf(correctText) };
+}
+
+function pct(n, d) { return d ? Math.round((n / d) * 1000) / 10 : 0; }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatDate(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+
+/* ============================================================
+   5. NAVIGATION
+   ============================================================ */
+const pages = {
+  home: renderHome,
+  vocab: renderVocab,
+  flash: renderFlash,
+  practice: renderPractice,
+  test: renderTest,
+  progress: renderProgress,
+  mistakes: renderMistakes
+};
+
+let currentPage = "home";
+
+function navigate(page) {
+  if (!pages[page]) return;
+  currentPage = page;
+  document.querySelectorAll(".nav-btn[data-page]").forEach(b => {
+    b.classList.toggle("active", b.dataset.page === page);
+  });
+  pages[page]();
+  window.scrollTo(0, 0);
+  closeSidebar();
+}
+
+document.querySelectorAll(".nav-btn[data-page]").forEach(btn => {
+  btn.addEventListener("click", () => navigate(btn.dataset.page));
+});
+
+/* Sidebar toggle (mobile) */
+const sidebar = $("#sidebar");
+const backdrop = $("#sidebarBackdrop");
+function openSidebar() { sidebar.classList.add("open"); backdrop.classList.add("show"); }
+function closeSidebar() { sidebar.classList.remove("open"); backdrop.classList.remove("show"); }
+$("#menuToggle").addEventListener("click", openSidebar);
+backdrop.addEventListener("click", closeSidebar);
+
+/* Reset button */
+$("#resetBtn").addEventListener("click", () => {
+  openModal(`
+    <h3>Reset All Progress</h3>
+    <p>Are you sure you want to reset all your learning progress? Vocabulary, questions and answer keys will not be affected.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="mCancel">Cancel</button>
+      <button class="btn btn-danger" id="mReset">Reset</button>
+    </div>
+  `);
+  $("#mCancel").addEventListener("click", closeModal);
+  $("#mReset").addEventListener("click", () => {
+    resetProgress();
+    closeModal();
+    navigate("home");
+  });
+});
+
+/* Modal helpers */
+const overlay = $("#modalOverlay");
+const modalContent = $("#modalContent");
+function openModal(html) {
+  modalContent.innerHTML = html;
+  overlay.classList.add("show");
+}
+function closeModal() { overlay.classList.remove("show"); }
+overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+/* ============================================================
+   6. DASHBOARD
+   ============================================================ */
+function renderHome() {
+  const totalVocab = VOCAB.length;
+  const masteredVocab = appState.mastered.length;
+  const totalQ = QUESTIONS.length;
+  const attempted = appState.practiceHistory.reduce((s, h) => s + h.total, 0);
+  const correct = appState.practiceHistory.reduce((s, h) => s + h.correct, 0);
+  const acc = pct(correct, attempted);
+  const mistakesCount = Object.keys(appState.mistakes).length;
+
+  const cards = [
+    { ico: "📚", t: "Vocabulary", d: "Learn and review 48 words with IPA, meanings and examples", prog: `${masteredVocab} / ${totalVocab} mastered`, page: "vocab" },
+    { ico: "🃏", t: "Flashcards", d: "Flip through 48 vocabulary cards and mark what you know", prog: `${Object.keys(appState.flashKnown).length} / ${totalVocab} known`, page: "flash" },
+    { ico: "✏️", t: "Practice", d: "Practice 176 questions with instant feedback and explanations", prog: `${attempted} attempts · ${acc}%`, page: "practice" },
+    { ico: "📝", t: "Test", d: "Timed tests with score, breakdown and detailed review", prog: appState.testHistory.length ? `${appState.testHistory.length} tests done` : "No tests yet", page: "test" },
+    { ico: "📊", t: "Progress", d: "Track vocabulary mastery, practice accuracy and test history", prog: "View dashboard", page: "progress" },
+    { ico: "❌", t: "Mistakes", d: "Review your wrong answers and master them again", prog: `${mistakesCount} mistakes saved`, page: "mistakes" }
+  ];
+
+  main.innerHTML = `
+    <h1 class="page-title">Vocabulary Unit 1–3</h1>
+    <p class="page-sub">48 words · 176 exercises · Chapters 1–2</p>
+    <div class="dash-grid">
+      ${cards.map(c => `
+        <div class="dash-card" data-go="${c.page}">
+          <div class="ico">${c.ico}</div>
+          <h3>${c.t}</h3>
+          <p>${c.d}</p>
+          <div class="prog-line">${c.prog}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  main.querySelectorAll(".dash-card").forEach(c => {
+    c.addEventListener("click", () => navigate(c.dataset.go));
+  });
+}
+
+/* ============================================================
+   7. VOCABULARY
+   ============================================================ */
+let vocabFilter = { search: "", unit: "all", chap: "all" };
+
+function renderVocab() {
+  const words = VOCAB.filter(v => {
+    if (vocabFilter.unit !== "all" && v.unit !== +vocabFilter.unit) return false;
+    if (vocabFilter.chap !== "all" && v.chap !== +vocabFilter.chap) return false;
+    if (vocabFilter.search) {
+      const s = vocabFilter.search.toLowerCase();
+      if (!(v.word.toLowerCase().includes(s) || v.vi.toLowerCase().includes(s) ||
+            v.def.toLowerCase().includes(s) || v.ipa.toLowerCase().includes(s))) return false;
+    }
+    return true;
+  });
+
+  main.innerHTML = `
+    <h1 class="page-title">📚 Vocabulary</h1>
+    <p class="page-sub">${VOCAB.length} words · Unit 1–3</p>
+    <div class="toolbar">
+      <input id="vocabSearch" class="search-box" type="text" placeholder="🔍 Search word, meaning, IPA..." value="${escapeHtml(vocabFilter.search)}">
+      <select id="vocabUnit" class="filter">
+        <option value="all">All Units</option>
+        <option value="1" ${vocabFilter.unit==="1"?"selected":""}>Unit 1</option>
+        <option value="2" ${vocabFilter.unit==="2"?"selected":""}>Unit 2</option>
+        <option value="3" ${vocabFilter.unit==="3"?"selected":""}>Unit 3</option>
+      </select>
+      <select id="vocabChap" class="filter">
+        <option value="all">All Chapters</option>
+        <option value="1" ${vocabFilter.chap==="1"?"selected":""}>Chapter 1</option>
+        <option value="2" ${vocabFilter.chap==="2"?"selected":""}>Chapter 2</option>
+      </select>
+    </div>
+    <div class="vocab-grid" id="vocabGrid">
+      ${words.length === 0 ? `<div class="empty-state" style="grid-column:1/-1"><div class="big-ico">🔍</div><h3>No words found</h3><p>Try a different search or filter.</p></div>` :
+        words.map(v => vocabCardHtml(v)).join("")}
+    </div>
+  `;
+
+  $("#vocabSearch").addEventListener("input", e => { vocabFilter.search = e.target.value; renderVocab(); });
+  $("#vocabUnit").addEventListener("change", e => { vocabFilter.unit = e.target.value; renderVocab(); });
+  $("#vocabChap").addEventListener("change", e => { vocabFilter.chap = e.target.value; renderVocab(); });
+
+  document.querySelectorAll(".icon-btn[data-fav]").forEach(b => {
+    b.addEventListener("click", () => toggleFav(b.dataset.fav));
+  });
+  document.querySelectorAll(".icon-btn[data-master]").forEach(b => {
+    b.addEventListener("click", () => toggleMaster(b.dataset.master));
+  });
+}
+
+function vocabCardHtml(v) {
+  const isFav = appState.favorites.includes(v.word);
+  const isMastered = appState.mastered.includes(v.word);
+  return `
+    <div class="vocab-card ${isMastered ? "mastered" : ""}">
+      <div class="vocab-actions">
+        <button class="icon-btn ${isFav?"on":""}" data-fav="${escapeHtml(v.word)}" title="Favorite">${isFav?"★":"☆"}</button>
+        <button class="icon-btn ${isMastered?"mastered":""}" data-master="${escapeHtml(v.word)}" title="Mastered">${isMastered?"✓":"○"}</button>
+      </div>
+      <div class="word">${escapeHtml(v.word)}</div>
+      <div class="ipa">${escapeHtml(v.ipa)}</div>
+      <span class="pos">${escapeHtml(v.pos)}</span>
+      <div class="meaning">${escapeHtml(v.vi)}</div>
+      <div class="def">${escapeHtml(v.def)}</div>
+      <div class="ex">"${escapeHtml(v.ex)}"</div>
+    </div>
+  `;
+}
+
+function toggleFav(word) {
+  const i = appState.favorites.indexOf(word);
+  if (i >= 0) appState.favorites.splice(i, 1);
+  else appState.favorites.push(word);
+  saveState();
+  renderVocab();
+}
+function toggleMaster(word) {
+  const i = appState.mastered.indexOf(word);
+  if (i >= 0) appState.mastered.splice(i, 1);
+  else appState.mastered.push(word);
+  saveState();
+  renderVocab();
+}
+
+/* ============================================================
+   8. FLASHCARDS
+   ============================================================ */
+let flashState = {
+  deck: [],
+  index: 0,
+  flipped: false,
+  filterUnit: "all"
+};
+
+function buildFlashDeck() {
+  let list = VOCAB.filter(v => flashState.filterUnit === "all" || v.unit === +flashState.filterUnit);
+  flashState.deck = shuffle(list);
+  flashState.index = 0;
+  flashState.flipped = false;
+}
+
+function renderFlash() {
+  if (flashState.deck.length === 0) buildFlashDeck();
+  const total = flashState.deck.length;
+  const card = flashState.deck[flashState.index];
+
+  main.innerHTML = `
+    <h1 class="page-title">🃏 Flashcards</h1>
+    <p class="page-sub">Click the card to reveal the meaning</p>
+    <div class="flash-wrap">
+      <div class="toolbar">
+        <select id="flashUnit" class="filter">
+          <option value="all" ${flashState.filterUnit==="all"?"selected":""}>All Units</option>
+          <option value="1" ${flashState.filterUnit==="1"?"selected":""}>Unit 1</option>
+          <option value="2" ${flashState.filterUnit==="2"?"selected":""}>Unit 2</option>
+          <option value="3" ${flashState.filterUnit==="3"?"selected":""}>Unit 3</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="flashShuffle">🔀 Shuffle</button>
+        <button class="btn btn-ghost btn-sm" id="flashRestart">↺ Restart</button>
+      </div>
+      <div class="flash-progress">
+        <span>${flashState.index+1} / ${total}</span>
+        <div class="bar"><div style="width:${pct(flashState.index+1, total)}%"></div></div>
+        <span>${appState.mastered.length}/${VOCAB.length} mastered</span>
+      </div>
+      <div class="flash-card" id="flashCard">
+        ${flashState.flipped ? `
+          <div class="back">
+            <div class="b-meaning">${escapeHtml(card.vi)}</div>
+            <div class="b-def">${escapeHtml(card.def)}</div>
+            <div class="b-ex">"${escapeHtml(card.ex)}"</div>
+          </div>
+        ` : `
+          <div class="front">
+            <div class="f-word">${escapeHtml(card.word)}</div>
+            <div class="f-ipa">${escapeHtml(card.ipa)}</div>
+            <span class="f-pos">${escapeHtml(card.pos)}</span>
+            <div class="hint">Click to flip →</div>
+          </div>
+        `}
+      </div>
+      <div class="flash-judge">
+        <button class="btn btn-ghost" id="flashNo">✕ I don't know</button>
+        <button class="btn btn-primary" id="flashYes">✓ I know</button>
+      </div>
+      <div class="flash-nav">
+        <button class="btn btn-ghost" id="flashPrev" ${flashState.index===0?"disabled":""}>← Previous</button>
+        <button class="btn btn-ghost" id="flashNext" ${flashState.index>=total-1?"disabled":""}>Next →</button>
+      </div>
+    </div>
+  `;
+
+  $("#flashCard").addEventListener("click", () => {
+    flashState.flipped = !flashState.flipped;
+    renderFlash();
+  });
+  $("#flashYes").addEventListener("click", () => {
+    appState.flashKnown[card.word] = true;
+    delete appState.flashUnknown[card.word];
+    if (!appState.mastered.includes(card.word)) appState.mastered.push(card.word);
+    saveState();
+    nextFlash();
+  });
+  $("#flashNo").addEventListener("click", () => {
+    appState.flashUnknown[card.word] = (appState.flashUnknown[card.word] || 0) + 1;
+    delete appState.flashKnown[card.word];
+    const i = appState.mastered.indexOf(card.word);
+    if (i >= 0) appState.mastered.splice(i, 1);
+    saveState();
+    nextFlash();
+  });
+  $("#flashPrev").addEventListener("click", () => {
+    if (flashState.index > 0) { flashState.index--; flashState.flipped = false; renderFlash(); }
+  });
+  $("#flashNext").addEventListener("click", nextFlash);
+  $("#flashShuffle").addEventListener("click", () => { buildFlashDeck(); renderFlash(); });
+  $("#flashRestart").addEventListener("click", () => { flashState.index = 0; flashState.flipped = false; renderFlash(); });
+  $("#flashUnit").addEventListener("change", e => {
+    flashState.filterUnit = e.target.value;
+    buildFlashDeck();
+    renderFlash();
+  });
+}
+
+function nextFlash() {
+  if (flashState.index < flashState.deck.length - 1) {
+    flashState.index++;
+    flashState.flipped = false;
+    renderFlash();
+  } else {
+    openModal(`
+      <h3>🎉 Session complete!</h3>
+      <p>You've reviewed all cards in this session. You mastered ${appState.mastered.length} out of ${VOCAB.length} words so far.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="mRestart">Restart</button>
+        <button class="btn btn-primary" id="mClose">Close</button>
+      </div>
+    `);
+    $("#mRestart").addEventListener("click", () => { closeModal(); flashState.index = 0; flashState.flipped = false; renderFlash(); });
+    $("#mClose").addEventListener("click", closeModal);
+  }
+}
+
+/* ============================================================
+   9. PRACTICE
+   ============================================================ */
+const practiceState = {
+  active: false,
+  questions: [],
+  index: 0,
+  answers: {},   // qIndex -> selectedOptionIndex
+  revealed: {},  // qIndex -> true
+  config: null
+};
+
+function renderPractice() {
+  if (practiceState.active) { renderPracticeRunner(); return; }
+
+  main.innerHTML = `
+    <h1 class="page-title">✏️ Practice</h1>
+    <p class="page-sub">Choose what to practise. Answers are shuffled each time.</p>
+    <div class="toolbar" style="margin-bottom:22px">
+      <button class="chip active" data-preset="all">All (176)</button>
+      <button class="chip" data-preset="A">Part A — Word Form (42)</button>
+      <button class="chip" data-preset="B">Part B — Vocab in Context (48)</button>
+      <button class="chip" data-preset="C">Part C — Mixed Vocab (20)</button>
+      <button class="chip" data-preset="D">Part D — Verb Forms (46)</button>
+      <button class="chip" data-preset="E">Part E — Mixed Verb Forms (20)</button>
+    </div>
+    <div class="toolbar" style="margin-bottom:22px">
+      <button class="chip" data-preset="u1">Unit 1</button>
+      <button class="chip" data-preset="u2">Unit 2</button>
+      <button class="chip" data-preset="u3">Unit 3</button>
+      <button class="chip" data-preset="mistakes">❌ Mistakes Only (${Object.keys(appState.mistakes).length})</button>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;max-width:560px">
+      <h3 style="font-size:17px;margin-bottom:10px">Custom Practice</h3>
+      <div class="form-group">
+        <label>Number of questions</label>
+        <select id="pracCount" class="filter" style="width:100%">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="50">50</option>
+          <option value="all">All matching</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Part</label>
+        <select id="pracPart" class="filter" style="width:100%">
+          <option value="all">All Parts</option>
+          <option value="A">Part A — Word Form</option>
+          <option value="B">Part B — Vocab in Context</option>
+          <option value="C">Part C — Mixed Vocab</option>
+          <option value="D">Part D — Verb Forms</option>
+          <option value="E">Part E — Mixed Verb Forms</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <select id="pracUnit" class="filter" style="width:100%">
+          <option value="all">All Units</option>
+          <option value="1">Unit 1</option>
+          <option value="2">Unit 2</option>
+          <option value="3">Unit 3</option>
+        </select>
+      </div>
+      <button class="btn btn-primary full" id="startPracBtn" style="margin-top:10px">▶ Start Practice</button>
+    </div>
+  `;
+
+  document.querySelectorAll(".chip[data-preset]").forEach(c => {
+    c.addEventListener("click", () => {
+      const p = c.dataset.preset;
+      let filterFn = () => true;
+      if (p === "A" || p === "B" || p === "C" || p === "D" || p === "E") filterFn = q => q.part === p;
+      else if (p === "u1") filterFn = q => q.unit === 1;
+      else if (p === "u2") filterFn = q => q.unit === 2;
+      else if (p === "u3") filterFn = q => q.unit === 3;
+      else if (p === "mistakes") filterFn = q => appState.mistakes[q.id];
+      else if (p === "all") filterFn = () => true;
+      startPracticeFrom(filterFn, "all");
+    });
+  });
+  $("#startPracBtn").addEventListener("click", () => {
+    const part = $("#pracPart").value;
+    const unit = $("#pracUnit").value;
+    const count = $("#pracCount").value;
+    const filterFn = q => (part === "all" || q.part === part) && (unit === "all" || q.unit === +unit);
+    startPracticeFrom(filterFn, count);
+  });
+}
+
+function startPracticeFrom(filterFn, count) {
+  let pool = QUESTIONS.filter(filterFn);
+  if (pool.length === 0) {
+    openModal(`<h3>No questions match</h3><p>No questions match the selected filter. Try a different combination.</p>
+      <div class="modal-actions"><button class="btn btn-primary" id="mOk">OK</button></div>`);
+    $("#mOk").addEventListener("click", closeModal);
+    return;
+  }
+  pool = shuffle(pool);
+  if (count !== "all") pool = pool.slice(0, Math.min(+count, pool.length));
+  practiceState.questions = pool.map(shuffleQuestion);
+  practiceState.index = 0;
+  practiceState.answers = {};
+  practiceState.revealed = {};
+  practiceState.active = true;
+  renderPracticeRunner();
+}
+
+function renderPracticeRunner() {
+  const q = practiceState.questions[practiceState.index];
+  const total = practiceState.questions.length;
+  const sel = practiceState.answers[practiceState.index];
+  const revealed = practiceState.revealed[practiceState.index];
+  const isLast = practiceState.index === total - 1;
+
+  main.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <button class="btn btn-ghost btn-sm" id="pracExit">← Exit Practice</button>
+      <span style="font-size:14px;color:var(--muted)">Question ${practiceState.index+1} / ${total}</span>
+    </div>
+    <div class="progress-bar-lg" style="margin-bottom:22px"><div style="width:${pct(practiceState.index+1, total)}%"></div></div>
+
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="tag part">Part ${q.part}</span>
+        <span class="tag unit">Unit ${q.unit} · Ch ${q.chap}</span>
+      </div>
+      <div class="q-text">${escapeHtml(q.q).replace(/______/g, '<span class="blank">______</span>')}</div>
+      <div class="q-options">
+        ${q.opts.map((opt, i) => {
+          let cls = "q-opt";
+          if (revealed) {
+            if (i === q.a) cls += " correct";
+            else if (i === sel) cls += " wrong";
+          } else if (sel === i) {
+            cls += " selected";
+          }
+          return `<button class="${cls}" data-i="${i}" ${revealed ? "disabled" : ""}>
+            <span class="letter">${String.fromCharCode(65+i)}</span>
+            <span>${escapeHtml(opt)}</span>
+          </button>`;
+        }).join("")}
+      </div>
+      ${revealed ? `
+        <div class="q-feedback ${sel === q.a ? "ok" : "bad"}">
+          <strong>${sel === q.a ? "🟢 Correct!" : "🔴 Incorrect"}</strong>
+          ${sel !== q.a ? `Correct answer: <b>${String.fromCharCode(65+q.a)}. ${escapeHtml(q.opts[q.a])}</b><br>` : ""}
+          <span style="color:#475569">${escapeHtml(q.ex)}</span>
+        </div>
+      ` : ""}
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost" id="pracPrev" ${practiceState.index===0?"disabled":""}>← Previous</button>
+      ${!revealed
+        ? `<button class="btn btn-primary" id="pracCheck" ${sel===undefined?"disabled":""}>Check Answer</button>`
+        : `<button class="btn btn-primary" id="pracNextQ">${isLast ? "Finish Practice" : "Next →"}</button>`}
+    </div>
+  `;
+
+  document.querySelectorAll(".q-opt:not([disabled])").forEach(b => {
+    b.addEventListener("click", () => {
+      practiceState.answers[practiceState.index] = +b.dataset.i;
+      renderPracticeRunner();
+    });
+  });
+  $("#pracExit").addEventListener("click", () => { practiceState.active = false; renderPractice(); });
+  $("#pracPrev").addEventListener("click", () => {
+    if (practiceState.index > 0) { practiceState.index--; renderPracticeRunner(); }
+  });
+  const chk = $("#pracCheck");
+  if (chk) chk.addEventListener("click", () => {
+    practiceState.revealed[practiceState.index] = true;
+    const q2 = practiceState.questions[practiceState.index];
+    const s = practiceState.answers[practiceState.index];
+    if (s !== q2.a) {
+      const m = appState.mistakes[q2.id] || { wrongCount: 0, lastDate: null, mastered: false };
+      m.wrongCount++;
+      m.lastDate = new Date().toISOString();
+      m.mastered = false;
+      appState.mistakes[q2.id] = m;
+    } else {
+      if (appState.mistakes[q2.id]) appState.mistakes[q2.id].mastered = true;
+    }
+    saveState();
+    renderPracticeRunner();
+  });
+  const nxt = $("#pracNextQ");
+  if (nxt) nxt.addEventListener("click", () => {
+    if (practiceState.index === total - 1) finishPractice();
+    else { practiceState.index++; renderPracticeRunner(); }
+  });
+}
+
+function finishPractice() {
+  const total = practiceState.questions.length;
+  let correct = 0, wrong = 0, unanswered = 0;
+  practiceState.questions.forEach((q, i) => {
+    const sel = practiceState.answers[i];
+    if (sel === undefined) unanswered++;
+    else if (sel === q.a) correct++;
+    else wrong++;
+  });
+  const accuracy = pct(correct, total);
+
+  appState.practiceHistory.unshift({
+    date: new Date().toISOString(),
+    total, correct, wrong, unanswered, accuracy
+  });
+  if (appState.practiceHistory.length > 30) appState.practiceHistory = appState.practiceHistory.slice(0, 30);
+  saveState();
+
+  practiceState.active = false;
+
+  main.innerHTML = `
+    <h1 class="page-title">🎉 Practice Complete!</h1>
+    <p class="page-sub">Review your results below</p>
+    <div class="result-hero">
+      <div class="big">${correct} / ${total}</div>
+      <div class="pct">${accuracy}% accuracy</div>
+      <div class="stat-row">
+        <div class="stat-box ok"><div class="num">${correct}</div><div class="lbl">Correct</div></div>
+        <div class="stat-box bad"><div class="num">${wrong}</div><div class="lbl">Wrong</div></div>
+        <div class="stat-box"><div class="num">${unanswered}</div><div class="lbl">Unanswered</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-primary" id="pracRetryWrong" ${wrong===0?"disabled":""}>🔁 Retry Wrong Questions</button>
+      <button class="btn btn-ghost" id="pracRetryAll">↺ Retry All</button>
+      <button class="btn btn-ghost" id="pracBack">🏠 Back to Dashboard</button>
+    </div>
+  `;
+
+  $("#pracRetryWrong").addEventListener("click", () => {
+    const wrongQs = practiceState.questions.filter((q, i) => practiceState.answers[i] !== undefined && practiceState.answers[i] !== q.a);
+    if (wrongQs.length === 0) return;
+    practiceState.questions = shuffle(wrongQs).map(shuffleQuestion);
+    practiceState.index = 0;
+    practiceState.answers = {};
+    practiceState.revealed = {};
+    practiceState.active = true;
+    renderPracticeRunner();
+  });
+  $("#pracRetryAll").addEventListener("click", () => {
+    practiceState.questions = shuffle(QUESTIONS).slice(0, practiceState.questions.length).map(shuffleQuestion);
+    practiceState.index = 0;
+    practiceState.answers = {};
+    practiceState.revealed = {};
+    practiceState.active = true;
+    renderPracticeRunner();
+  });
+  $("#pracBack").addEventListener("click", () => navigate("home"));
+}
+
+/* ============================================================
+   10. TEST
+   ============================================================ */
+const testState = {
+  active: false,
+  questions: [],
+  answers: {},
+  index: 0,
+  startTime: null,
+  timeLimit: 0,
+  timerId: null
+};
+
+function renderTest() {
+  if (testState.active) { renderTestRunner(); return; }
+  main.innerHTML = `
+    <h1 class="page-title">📝 Test</h1>
+    <p class="page-sub">Configure your test below. No explanations during the test.</p>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;max-width:620px">
+      <div class="form-group">
+        <label>Number of Questions</label>
+        <select id="tCount" class="filter" style="width:100%">
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+          <option value="50">50</option>
+          <option value="60">60</option>
+          <option value="100">100</option>
+          <option value="176">176 (all)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Question Types</label>
+        <label class="checkbox-row"><input type="checkbox" class="tType" value="A" checked> Part A — Word Form</label>
+        <label class="checkbox-row"><input type="checkbox" class="tType" value="B" checked> Part B — Vocab in Context</label>
+        <label class="checkbox-row"><input type="checkbox" class="tType" value="C" checked> Part C — Mixed Vocab</label>
+        <label class="checkbox-row"><input type="checkbox" class="tType" value="D" checked> Part D — Verb Forms</label>
+        <label class="checkbox-row"><input type="checkbox" class="tType" value="E" checked> Part E — Mixed Verb Forms</label>
+      </div>
+      <div class="form-group">
+        <label>Units</label>
+        <label class="checkbox-row"><input type="checkbox" class="tUnit" value="1" checked> Unit 1</label>
+        <label class="checkbox-row"><input type="checkbox" class="tUnit" value="2" checked> Unit 2</label>
+        <label class="checkbox-row"><input type="checkbox" class="tUnit" value="3" checked> Unit 3</label>
+      </div>
+      <div class="form-group">
+        <label>Time Limit</label>
+        <select id="tTime" class="filter" style="width:100%">
+          <option value="0" selected>No time limit</option>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
+      </div>
+      <button class="btn btn-primary full" id="startTestBtn" style="margin-top:10px">▶ Start Test</button>
+    </div>
+  `;
+  $("#startTestBtn").addEventListener("click", startTest);
+}
+
+function startTest() {
+  const count = +$("#tCount").value;
+  const types = Array.from(document.querySelectorAll(".tType:checked")).map(c => c.value);
+  const units = Array.from(document.querySelectorAll(".tUnit:checked")).map(c => +c.value);
+  const timeLimit = +$("#tTime").value;
+
+  if (types.length === 0 || units.length === 0) {
+    openModal(`<h3>Please select at least one</h3><p>You need to select at least one question type and one unit.</p>
+      <div class="modal-actions"><button class="btn btn-primary" id="mOk2">OK</button></div>`);
+    $("#mOk2").addEventListener("click", closeModal);
+    return;
+  }
+  let pool = QUESTIONS.filter(q => types.includes(q.part) && units.includes(q.unit));
+  if (pool.length === 0) {
+    openModal(`<h3>No questions match</h3><p>Try a different combination of types and units.</p>
+      <div class="modal-actions"><button class="btn btn-primary" id="mOk3">OK</button></div>`);
+    $("#mOk3").addEventListener("click", closeModal);
+    return;
+  }
+  pool = shuffle(pool);
+  testState.questions = pool.slice(0, Math.min(count, pool.length)).map(shuffleQuestion);
+  testState.answers = {};
+  testState.index = 0;
+  testState.startTime = Date.now();
+  testState.timeLimit = timeLimit * 60;
+  testState.active = true;
+  if (testState.timerId) clearInterval(testState.timerId);
+  if (timeLimit > 0) {
+    testState.timerId = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - testState.startTime) / 1000);
+      const left = testState.timeLimit - elapsed;
+      const el = $("#testTimer");
+      if (el) {
+        if (left <= 0) { clearInterval(testState.timerId); finishTest(); }
+        else {
+          const m = String(Math.floor(left / 60)).padStart(2, "0");
+          const s = String(left % 60).padStart(2, "0");
+          el.textContent = `⏱ ${m}:${s}`;
+          if (left < 60) el.style.color = "var(--red)";
+        }
+      }
+    }, 500);
+  }
+  renderTestRunner();
+}
+
+function renderTestRunner() {
+  const q = testState.questions[testState.index];
+  const total = testState.questions.length;
+  const sel = testState.answers[q.id];
+  const answered = Object.keys(testState.answers).length;
+  const isLast = testState.index === total - 1;
+
+  main.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <span style="font-size:14px;color:var(--muted)">Question ${testState.index+1} / ${total} · Answered: ${answered}</span>
+      ${testState.timeLimit > 0 ? `<span id="testTimer" style="font-weight:800;font-size:16px;color:var(--primary-dark)">⏱ --:--</span>` : `<span style="font-size:13px;color:var(--muted)">No time limit</span>`}
+    </div>
+    <div class="progress-bar-lg" style="margin-bottom:22px"><div style="width:${pct(answered, total)}%"></div></div>
+
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="tag part">Part ${q.part}</span>
+        <span class="tag unit">Unit ${q.unit} · Ch ${q.chap}</span>
+      </div>
+      <div class="q-text">${escapeHtml(q.q).replace(/______/g, '<span class="blank">______</span>')}</div>
+      <div class="q-options">
+        ${q.opts.map((opt, i) => {
+          const cls = "q-opt" + (sel === i ? " selected" : "");
+          return `<button class="${cls}" data-i="${i}">
+            <span class="letter">${String.fromCharCode(65+i)}</span>
+            <span>${escapeHtml(opt)}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" id="testPrev" ${testState.index===0?"disabled":""}>← Previous</button>
+        <button class="btn btn-ghost" id="testNext" ${isLast?"disabled":""}>Next →</button>
+      </div>
+      <button class="btn btn-primary" id="testSubmit">Submit Test</button>
+    </div>
+  `;
+
+  // Update timer display immediately
+  if (testState.timeLimit > 0) {
+    const elapsed = Math.floor((Date.now() - testState.startTime) / 1000);
+    const left = Math.max(0, testState.timeLimit - elapsed);
+    const m = String(Math.floor(left / 60)).padStart(2, "0");
+    const s = String(left % 60).padStart(2, "0");
+    const el = $("#testTimer");
+    if (el) el.textContent = `⏱ ${m}:${s}`;
+  }
+
+  document.querySelectorAll(".q-opt").forEach(b => {
+    b.addEventListener("click", () => {
+      testState.answers[q.id] = +b.dataset.i;
+      renderTestRunner();
+    });
+  });
+  $("#testPrev").addEventListener("click", () => { if (testState.index > 0) { testState.index--; renderTestRunner(); } });
+  $("#testNext").addEventListener("click", () => { if (testState.index < total - 1) { testState.index++; renderTestRunner(); } });
+  $("#testSubmit").addEventListener("click", confirmSubmitTest);
+}
+
+function confirmSubmitTest() {
+  const total = testState.questions.length;
+  const answered = Object.keys(testState.answers).length;
+  const unanswered = total - answered;
+  if (unanswered > 0) {
+    openModal(`
+      <h3>Unanswered Questions</h3>
+      <p>You still have <b>${unanswered}</b> unanswered question${unanswered>1?"s":""}. Are you sure you want to submit?</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="mContinue">Continue Test</button>
+        <button class="btn btn-primary" id="mSubmitAnyway">Submit Anyway</button>
+      </div>
+    `);
+    $("#mContinue").addEventListener("click", closeModal);
+    $("#mSubmitAnyway").addEventListener("click", () => { closeModal(); finishTest(); });
+  } else {
+    finishTest();
+  }
+}
+
+function finishTest() {
+  if (testState.timerId) { clearInterval(testState.timerId); testState.timerId = null; }
+  testState.active = false;
+  const total = testState.questions.length;
+  let correct = 0, wrong = 0, unanswered = 0;
+  const byPart = { A: {c:0,t:0}, B: {c:0,t:0}, C: {c:0,t:0}, D: {c:0,t:0}, E: {c:0,t:0} };
+  testState.questions.forEach(q => {
+    const sel = testState.answers[q.id];
+    byPart[q.part].t++;
+    if (sel === undefined) unanswered++;
+    else if (sel === q.a) { correct++; byPart[q.part].c++; }
+    else {
+      wrong++;
+      const m = appState.mistakes[q.id] || { wrongCount: 0, lastDate: null, mastered: false };
+      m.wrongCount++;
+      m.lastDate = new Date().toISOString();
+      m.mastered = false;
+      appState.mistakes[q.id] = m;
+    }
+  });
+  const percentage = pct(correct, total);
+  const timeUsed = Math.floor((Date.now() - testState.startTime) / 1000);
+  const mins = Math.floor(timeUsed / 60), secs = timeUsed % 60;
+
+  appState.testHistory.unshift({
+    date: new Date().toISOString(),
+    total, correct, wrong, unanswered, percentage,
+    timeUsed, timeLimit: testState.timeLimit
+  });
+  if (appState.testHistory.length > 30) appState.testHistory = appState.testHistory.slice(0, 30);
+  saveState();
+
+  main.innerHTML = `
+    <h1 class="page-title">📝 Test Result</h1>
+    <p class="page-sub">Review your score and breakdown</p>
+    <div class="result-hero">
+      <div class="big">${correct} / ${total}</div>
+      <div class="pct">${percentage}%</div>
+      <div class="stat-row">
+        <div class="stat-box ok"><div class="num">${correct}</div><div class="lbl">Correct</div></div>
+        <div class="stat-box bad"><div class="num">${wrong}</div><div class="lbl">Wrong</div></div>
+        <div class="stat-box"><div class="num">${unanswered}</div><div class="lbl">Unanswered</div></div>
+        ${testState.timeLimit > 0 ? `<div class="stat-box"><div class="num">${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}</div><div class="lbl">Time used</div></div>` : ""}
+      </div>
+    </div>
+
+    <div class="prog-block">
+      <h3>Breakdown by Question Type</h3>
+      <table style="width:100%;font-size:14px">
+        <thead><tr style="text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase">
+          <th style="padding:6px 0">Type</th><th style="text-align:right">Correct</th><th style="text-align:right">Total</th><th style="text-align:right">Accuracy</th>
+        </tr></thead>
+        <tbody>
+          ${["A","B","C","D","E"].map(p => byPart[p].t === 0 ? "" :
+            `<tr><td style="padding:6px 0">Part ${p}</td>
+              <td style="text-align:right">${byPart[p].c}</td>
+              <td style="text-align:right">${byPart[p].t}</td>
+              <td style="text-align:right;font-weight:700">${pct(byPart[p].c, byPart[p].t)}%</td></tr>`
+          ).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+      <button class="btn btn-primary" id="testReview">🔍 Review Answers</button>
+      <button class="btn btn-ghost" id="testRetryWrong" ${wrong===0?"disabled":""}>🔁 Retry Wrong Questions</button>
+      <button class="btn btn-ghost" id="testBack">🏠 Back to Dashboard</button>
+    </div>
+  `;
+
+  $("#testReview").addEventListener("click", () => showReview(testState.questions, testState.answers));
+  $("#testRetryWrong").addEventListener("click", () => {
+    const wrongQs = testState.questions.filter(q => testState.answers[q.id] !== undefined && testState.answers[q.id] !== q.a);
+    if (wrongQs.length === 0) return;
+    testState.questions = shuffle(wrongQs).map(shuffleQuestion);
+    testState.answers = {};
+    testState.index = 0;
+    testState.startTime = Date.now();
+    testState.timeLimit = 0;
+    testState.active = true;
+    renderTestRunner();
+  });
+  $("#testBack").addEventListener("click", () => navigate("home"));
+}
+
+function showReview(questions, answers) {
+  const items = questions.map((q, i) => {
+    const sel = answers[q.id];
+    const isCorrect = sel === q.a;
+    return `
+      <div class="q-card" style="border-left:4px solid ${isCorrect?"var(--green)":"var(--red)"}">
+        <div class="q-meta">
+          <span class="tag part">Part ${q.part}</span>
+          <span class="tag unit">Unit ${q.unit} · Ch ${q.chap}</span>
+          <span style="color:${isCorrect?"var(--green)":"var(--red)"};font-weight:800">${isCorrect?"✓ Correct":"✗ Incorrect"}</span>
+        </div>
+        <div class="q-text">${escapeHtml(q.q).replace(/______/g, '<span class="blank">______</span>')}</div>
+        <div class="q-options">
+          ${q.opts.map((opt, j) => {
+            let cls = "q-opt";
+            if (j === q.a) cls += " correct";
+            else if (j === sel) cls += " wrong";
+            return `<button class="${cls}" disabled>
+              <span class="letter">${String.fromCharCode(65+j)}</span>
+              <span>${escapeHtml(opt)}</span>
+            </button>`;
+          }).join("")}
+        </div>
+        <div class="q-feedback ${isCorrect?"ok":"bad"}">
+          <strong>${isCorrect?"🟢 Correct!":"🔴 Incorrect"}</strong>
+          ${!isCorrect ? `Correct answer: <b>${String.fromCharCode(65+q.a)}. ${escapeHtml(q.opts[q.a])}</b><br>` : ""}
+          <span style="color:#475569">${escapeHtml(q.ex)}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  main.innerHTML = `
+    <h1 class="page-title">🔍 Review Answers</h1>
+    <p class="page-sub">All questions with explanations</p>
+    <div style="margin-bottom:20px">
+      <button class="btn btn-ghost" id="reviewBack">← Back</button>
+    </div>
+    ${items}
+    <div style="margin-top:20px;text-align:center">
+      <button class="btn btn-primary" id="reviewHome">🏠 Back to Dashboard</button>
+    </div>
+  `;
+  $("#reviewBack").addEventListener("click", () => navigate("test"));
+  $("#reviewHome").addEventListener("click", () => navigate("home"));
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   11. PROGRESS
+   ============================================================ */
+function renderProgress() {
+  const masteredVocab = appState.mastered.length;
+  const totalVocab = VOCAB.length;
+  const learned = Object.keys(appState.flashKnown).length;
+
+  const totalAttempted = appState.practiceHistory.reduce((s, h) => s + h.total, 0);
+  const totalCorrect = appState.practiceHistory.reduce((s, h) => s + h.correct, 0);
+  const totalWrong = appState.practiceHistory.reduce((s, h) => s + (h.wrong || 0), 0);
+
+  const tests = appState.testHistory;
+  const highestScore = tests.length ? Math.max(...tests.map(t => t.percentage)) : 0;
+  const avgScore = tests.length ? Math.round(tests.reduce((s, t) => s + t.percentage, 0) / tests.length * 10) / 10 : 0;
+
+  // Unit mastery
+  const unitVocabMastered = {1:0, 2:0, 3:0};
+  const unitVocabTotal = {1:0, 2:0, 3:0};
+  VOCAB.forEach(v => {
+    unitVocabTotal[v.unit]++;
+    if (appState.mastered.includes(v.word)) unitVocabMastered[v.unit]++;
+  });
+
+  main.innerHTML = `
+    <h1 class="page-title">📊 My Progress</h1>
+    <p class="page-sub">Track your learning journey</p>
+
+    <div class="prog-block">
+      <h3>📚 Vocabulary Mastery</h3>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px">
+        <span><strong>${masteredVocab} / ${totalVocab}</strong> mastered</span>
+        <strong>${pct(masteredVocab, totalVocab)}%</strong>
+      </div>
+      <div class="progress-bar-lg"><div style="width:${pct(masteredVocab, totalVocab)}%"></div></div>
+      <div class="row"><span>Learned (flashcard "I know")</span><strong>${learned}</strong></div>
+      <div class="row"><span>Still learning</span><strong>${totalVocab - masteredVocab}</strong></div>
+      <div class="row"><span>Favorites</span><strong>${appState.favorites.length}</strong></div>
+    </div>
+
+    <div class="prog-block">
+      <h3>✏️ Practice</h3>
+      <div class="row"><span>Total questions attempted</span><strong>${totalAttempted}</strong></div>
+      <div class="row"><span>Correct</span><strong style="color:var(--green)">${totalCorrect}</strong></div>
+      <div class="row"><span>Wrong</span><strong style="color:var(--red)">${totalWrong}</strong></div>
+      <div class="row"><span>Overall accuracy</span><strong>${pct(totalCorrect, totalAttempted)}%</strong></div>
+      <div class="row"><span>Sessions completed</span><strong>${appState.practiceHistory.length}</strong></div>
+    </div>
+
+    <div class="prog-block">
+      <h3>📝 Test</h3>
+      <div class="row"><span>Tests taken</span><strong>${tests.length}</strong></div>
+      <div class="row"><span>Highest score</span><strong>${highestScore}%</strong></div>
+      <div class="row"><span>Average score</span><strong>${avgScore}%</strong></div>
+      ${tests.length ? `<div class="row"><span>Last test</span><strong>${formatDate(tests[0].date)}</strong></div>` : ""}
+    </div>
+
+    <div class="prog-block">
+      <h3>📈 Unit Mastery</h3>
+      ${[1,2,3].map(u => {
+        const p = pct(unitVocabMastered[u], unitVocabTotal[u]);
+        return `<div class="unit-prog">
+          <div class="u-name">Unit ${u}</div>
+          <div class="bar"><div style="width:${p}%"></div></div>
+          <div class="pct-txt">${p}%</div>
+        </div>`;
+      }).join("")}
+    </div>
+
+    ${appState.practiceHistory.length ? `
+      <div class="prog-block">
+        <h3>🕒 Recent Practice History</h3>
+        ${appState.practiceHistory.slice(0, 10).map(h => `
+          <div class="history-item">
+            <div>
+              <div><strong>${h.total} questions</strong> · ${h.correct} correct</div>
+              <div class="date">${formatDate(h.date)}</div>
+            </div>
+            <div class="score">${h.accuracy}%</div>
+          </div>
+        `).join("")}
+      </div>
+    ` : ""}
+
+    ${tests.length ? `
+      <div class="prog-block">
+        <h3>🕒 Recent Test History</h3>
+        ${tests.slice(0, 10).map(t => `
+          <div class="history-item">
+            <div>
+              <div><strong>${t.correct}/${t.total}</strong> correct</div>
+              <div class="date">${formatDate(t.date)}${t.timeLimit ? ` · ${Math.floor(t.timeUsed/60)}:${String(t.timeUsed%60).padStart(2,"0")} used` : ""}</div>
+            </div>
+            <div class="score">${t.percentage}%</div>
+          </div>
+        `).join("")}
+      </div>
+    ` : ""}
+  `;
+}
+
+/* ============================================================
+   12. MISTAKES
+   ============================================================ */
+function renderMistakes() {
+  const ids = Object.keys(appState.mistakes).map(Number);
+  const items = ids.map(id => {
+    const q = QUESTIONS.find(x => x.id === id);
+    const m = appState.mistakes[id];
+    if (!q) return "";
+    return { q, m };
+  }).filter(Boolean).sort((a, b) => b.m.wrongCount - a.m.wrongCount);
+
+  main.innerHTML = `
+    <h1 class="page-title">❌ My Mistakes</h1>
+    <p class="page-sub">${items.length} question${items.length!==1?"s":""} saved</p>
+    ${items.length === 0 ? `
+      <div class="empty-state">
+        <div class="big-ico">✨</div>
+        <h3>No mistakes yet!</h3>
+        <p>Great job! Any question you answer incorrectly in Practice or Test will appear here.</p>
+      </div>
+    ` : `
+      <div style="margin-bottom:18px">
+        <button class="btn btn-primary" id="practiceMistakes">✏️ Practice These Mistakes</button>
+      </div>
+      ${items.map(({q, m}) => `
+        <div class="mistake-item ${m.mastered ? "mastered" : ""}">
+          <div class="q-meta">
+            <span class="tag part">Part ${q.part}</span>
+            <span class="tag unit">Unit ${q.unit} · Ch ${q.chap}</span>
+            ${m.mastered ? `<span style="color:var(--green);font-weight:800">✓ Mastered</span>` : `<span style="color:var(--red);font-weight:800">Wrong × ${m.wrongCount}</span>`}
+          </div>
+          <div class="m-q">${escapeHtml(q.q).replace(/______/g, '<span class="blank">______</span>')}</div>
+          <div class="m-ans">
+            Correct answer: <span class="correct">${String.fromCharCode(65+q.a)}. ${escapeHtml(q.opts[q.a])}</span>
+          </div>
+          <div style="font-size:13.5px;color:#475569;margin-top:8px">${escapeHtml(q.ex)}</div>
+          <div class="m-meta">Last attempted: ${m.lastDate ? formatDate(m.lastDate) : "—"}</div>
+        </div>
+      `).join("")}
+    `}
+  `;
+
+  const btn = $("#practiceMistakes");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const wrongQs = items.map(x => x.q);
+      if (wrongQs.length === 0) return;
+      practiceState.questions = shuffle(wrongQs).map(shuffleQuestion);
+      practiceState.index = 0;
+      practiceState.answers = {};
+      practiceState.revealed = {};
+      practiceState.active = true;
+      navigate("practice");
+    });
+  }
+}
+
+/* ============================================================
+   13. INIT
+   ============================================================ */
+navigate("home");
+</script>
+</body>
+</html>
